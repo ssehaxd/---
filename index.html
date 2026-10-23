@@ -1,0 +1,1936 @@
+<title>Стык под давлением</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Лист чертежа испытательного стенда: миллиметровка, тушь, сигнальный оранжевый, штамп по ГОСТ внизу. */
+:root{
+  --bg:#e7ecf1; --paper:#f7f9fb; --paper2:#eef2f6; --ink:#13233a; --mu:#53637a; --dim:#8492a3;
+  --ln:rgba(19,35,58,.16); --ln2:rgba(19,35,58,.42); --grid:rgba(19,35,58,.055);
+  --acc:#e4560b; --acc2:#ff7d33; --acc-ink:#ffffff; --acc-soft:rgba(228,86,11,.1);
+  --ok:#0f8a6c; --warn:#b5750f; --bad:#d4253e; --st:var(--ok); --cm:52%;
+  --edge:rgba(19,35,58,.2); --acc-edge:#a63c04; --key:#ffffff; --key2:#e8edf2;
+  --sc1:#e2e8ef; --sc2:#d3dbe4; --sc3:#c2cad4; --scgrid:rgba(19,35,58,.07); --sup:#6a7787; --sup2:#4f5b6a; --floor:rgba(19,35,58,.22); --tag:#13233a;
+  --fg:var(--ink);
+  --fd:'Unbounded','Arial Black',system-ui,sans-serif; --fb:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; --fm:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --r:4px; --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a111d; --paper:#101a2a; --paper2:#152236; --ink:#e4ebf3; --mu:#93a3b8; --dim:#5f6f84;
+  --ln:rgba(228,235,243,.11); --ln2:rgba(228,235,243,.3); --grid:rgba(228,235,243,.035);
+  --acc:#ff7a2e; --acc2:#ffa066; --acc-ink:#1a0a01; --acc-soft:rgba(255,122,46,.12);
+  --ok:#3ddc97; --warn:#f5b942; --bad:#ff4d66; --cm:100%;
+  --sc1:#132034; --sc2:#0c1524; --sc3:#151d2a; --scgrid:rgba(255,255,255,.04); --sup:#2b3548; --sup2:#3b475c; --floor:rgba(0,0,0,.55); --tag:#070c15; --edge:rgba(0,0,0,.55); --acc-edge:#a8460c; --key:#1d2b44; --key2:#16223a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a111d; --paper:#101a2a; --paper2:#152236; --ink:#e4ebf3; --mu:#93a3b8; --dim:#5f6f84;
+  --ln:rgba(228,235,243,.11); --ln2:rgba(228,235,243,.3); --grid:rgba(228,235,243,.035);
+  --acc:#ff7a2e; --acc2:#ffa066; --acc-ink:#1a0a01; --acc-soft:rgba(255,122,46,.12);
+  --ok:#3ddc97; --warn:#f5b942; --bad:#ff4d66; --cm:100%;
+  --sc1:#132034; --sc2:#0c1524; --sc3:#151d2a; --scgrid:rgba(255,255,255,.04); --sup:#2b3548; --sup2:#3b475c; --floor:rgba(0,0,0,.55); --tag:#070c15; --edge:rgba(0,0,0,.55); --acc-edge:#a8460c; --key:#1d2b44; --key2:#16223a;
+  color-scheme:dark}
+:root[data-state="ok"]{--st:var(--ok)} :root[data-state="warn"]{--st:var(--warn)} :root[data-state="bad"],:root[data-state="rupt"]{--st:var(--bad)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--fb);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px}
+::selection{background:var(--acc);color:var(--acc-ink)}
+button,select{font-family:inherit;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+h1,h2,h3{text-wrap:balance}
+
+.wrap{max-width:1320px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+
+/* шапка */
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:16px}
+@media (max-width:760px){.top{grid-template-columns:minmax(0,1fr)}}
+.eyebrow{font:600 11px var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--acc);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{color:var(--mu)}
+.top h1{margin:6px 0 0;font:700 clamp(30px,5.4vw,64px)/.98 var(--fd);letter-spacing:-.02em;text-transform:uppercase}
+.top h1 em{font-style:normal;color:var(--acc)}
+.top p{margin:10px 0 0;color:var(--mu);max-width:62ch;font-size:15px}
+.tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--st);color:var(--st);background:var(--paper);font:600 12px/1 var(--fm);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;border-radius:var(--r);transition:color .3s,border-color .3s}
+.pill i{width:8px;height:8px;background:var(--st);animation:blink 1.2s steps(2) infinite}
+:root[data-state="rupt"] .pill{background:var(--bad);color:var(--paper)} :root[data-state="rupt"] .pill i{background:var(--paper)}
+@keyframes blink{50%{opacity:.25}}
+.ghost{border:1.5px solid var(--ln2);background:var(--paper);color:var(--ink);border-radius:var(--r);padding:9px 13px;font:600 13px var(--fb);cursor:pointer;transition:border-color .2s,background .2s}
+.ghost:hover{border-color:var(--ink);background:var(--paper2)}
+.ghost:active{transform:translateY(1px)}
+.snd{min-width:44px}
+
+/* листы */
+.sheet{position:relative;background:var(--paper);border:1.5px solid var(--ln2);border-radius:var(--r);min-width:0}
+.sh-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--ln)}
+.sh-h h2{margin:0;font:600 12px/1.3 var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:10px}
+.stage .sh-h h2::before{content:"";width:10px;height:10px;flex:none}
+.sh-h h2 .ic{color:var(--acc);width:18px;height:18px}
+.ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+.ghost,.mini,.run,.tab,.toast button,.sh-h small{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.jic{display:block;width:30px;height:30px;stroke-width:1.5;margin-bottom:8px}
+.tile .ic{color:var(--acc);width:14px;height:14px}
+.tab .ic{width:15px;height:15px}
+.run .ic{width:18px;height:18px}
+.mini .ic{width:14px;height:14px}
+.ghost .ic{width:17px;height:17px}
+.sh-h small{color:var(--mu);font-size:12.5px}
+.sh-b{padding:16px}
+
+/* сцена */
+.stage{overflow:hidden;border-color:var(--ink);border-width:2px}
+.stage .sh-h h2::before{background:var(--st);border-color:var(--st);transform:none;border-radius:50%}
+.view{position:relative;background:var(--sc1);border-bottom:1px solid var(--ln)}
+.view canvas{display:block;width:100%;touch-action:pan-y}
+.corner{position:absolute;width:14px;height:14px;border-color:var(--acc);border-style:solid;pointer-events:none}
+.corner.c1{left:8px;top:8px;border-width:2px 0 0 2px}.corner.c2{right:8px;top:8px;border-width:2px 2px 0 0}.corner.c3{left:8px;bottom:8px;border-width:0 0 2px 2px}.corner.c4{right:8px;bottom:8px;border-width:0 2px 2px 0}
+:root[data-state="rupt"] .stage{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 30%,transparent)}
+.tip{position:absolute;pointer-events:none;z-index:3;background:var(--tag);color:#e9eef5;border-left:3px solid var(--acc);border-radius:2px;padding:9px 12px;font-size:13px;line-height:1.45;max-width:260px;opacity:0;transition:opacity .15s}
+.tip.on{opacity:1} .tip b{display:block;font:600 12px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:#ffa066}
+.tip span{display:block;color:#b8c3d1;font-family:var(--fm);font-size:12px}
+.console{display:grid;grid-template-columns:minmax(0,1.2fr) auto minmax(0,2fr);gap:20px;align-items:center;padding:16px}
+@media (max-width:1000px){.console{grid-template-columns:minmax(0,1fr)}}
+.run{position:relative;border:2px solid var(--ink);border-radius:var(--r);padding:0 26px;min-height:64px;color:var(--acc-ink);background:var(--acc);font:700 15px/1 var(--fd);text-transform:uppercase;letter-spacing:.02em;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s,background .2s}
+.run:hover{background:var(--acc2)}
+.run:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.run[data-on="true"]{background:var(--bad);color:#fff;animation:throb 1s steps(2) infinite}
+@keyframes throb{50%{box-shadow:4px 4px 0 var(--bad)}}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1.5px solid var(--ln2);border-radius:var(--r);overflow:hidden}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{padding:11px 13px;min-width:0;border-right:1px solid var(--ln);background:var(--paper)}
+.tile:last-child{border-right:0}
+@media (max-width:560px){.tile:nth-child(2){border-right:0}.tile:nth-child(-n+2){border-bottom:1px solid var(--ln)}}
+.tile span{display:flex;gap:6px;align-items:center;font:500 10.5px/1.25 var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.tile b{display:block;margin-top:6px;font:600 clamp(15px,1.45vw,19px)/1.1 var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+.tile.t-v{background:color-mix(in srgb,var(--st) 10%,var(--paper))}
+.tile.t-v b{color:var(--st)}
+.tile b.bump{animation:bump .3s var(--ease)}
+@keyframes bump{40%{transform:translateY(-3px)}}
+
+/* сетки */
+.grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1060px){.grid{grid-template-columns:minmax(0,1fr) 390px}}
+.side{display:grid;gap:18px;align-content:start}
+.duo{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1060px){.duo{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+
+/* вкладки */
+.tabs{display:flex;gap:0;border-bottom:1.5px solid var(--ln2);overflow-x:auto;scrollbar-width:none;padding:0 8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;border-bottom:3px solid transparent;margin-bottom:-1.5px;background:transparent;color:var(--mu);font:600 12px var(--fm);text-transform:uppercase;letter-spacing:.1em;padding:14px 14px 11px;cursor:pointer;transition:color .2s,border-color .2s}
+.tab:hover{color:var(--ink)} .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.tabp{display:grid;gap:22px;padding:18px 16px}
+.tabp:not([hidden]){animation:tabin .3s var(--ease)}
+@keyframes tabin{from{opacity:.4;transform:translateY(6px)}}
+
+/* выбор */
+.sub{margin:0 0 9px;font:600 11px var(--fm);color:var(--mu);text-transform:uppercase;letter-spacing:.12em}
+.sub b{color:var(--acc);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--ln2);background:var(--paper);color:var(--ink);border-radius:var(--r);padding:8px 12px;font:600 13px/1.25 var(--fb);cursor:pointer;text-align:left;transition:border-color .15s,background .15s}
+.chip small{display:block;margin-top:2px;color:var(--mu);font:500 11px var(--fm)}
+.chip:hover{border-color:var(--ink)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip[aria-pressed="true"] small{color:color-mix(in srgb,var(--paper) 70%,transparent)}
+#pick-j{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+#pick-j .chip{padding:12px 13px;font:600 12px/1.25 var(--fd);text-transform:uppercase}
+#pick-j .chip small{text-transform:none;font-family:var(--fb);font-weight:400}
+#pick-j .chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+#pick-j .chip[aria-pressed="true"] small{color:var(--acc-ink);opacity:.8}
+.sel{width:100%;background:var(--paper);color:var(--ink);border:1.5px solid var(--ln2);border-radius:var(--r);padding:10px 12px;font:600 14px var(--fb);cursor:pointer}
+.sel:hover,.sel:focus{border-color:var(--ink)}
+.note{margin:12px 0 0;padding:10px 12px;border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--paper));color:var(--ink);font-size:13.5px}
+.note:empty{display:none}
+.pick2{display:grid;gap:22px 28px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px 28px}
+.pgrid:empty{display:none}
+.cap{margin:0;font-size:13px;color:var(--mu);max-width:78ch}
+
+/* ползунки */
+.dial{--c:var(--ink);display:grid;gap:6px;min-width:0}
+.dial-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dial label{font-weight:500;font-size:13.5px}
+.valbox{display:flex;align-items:center;gap:4px}
+.valbox output{font:600 16px var(--fm);min-width:6.5ch;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.valbox output small{font:500 11px var(--fm);color:var(--mu);margin-left:4px}
+.dial.big{--c:var(--acc)}
+.dial.big label{font:600 12px var(--fm);text-transform:uppercase;letter-spacing:.12em;color:var(--mu)}
+.dial.big .valbox output{font:700 clamp(26px,3.2vw,38px)/1 var(--fd);min-width:5.2ch;color:var(--ink);letter-spacing:-.02em}
+.dial.big .step{width:42px;height:42px;font-size:20px}
+.step{width:32px;height:32px;border-radius:var(--r);border:1.5px solid var(--ln2);background:var(--paper);color:var(--ink);font:600 17px/1 var(--fb);cursor:pointer;touch-action:manipulation;user-select:none}
+.step:hover{border-color:var(--ink)} .step:active{background:var(--paper2)}
+.rng{display:flex;justify-content:space-between;color:var(--dim);font:500 10.5px var(--fm)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;--pct:50%;touch-action:pan-y;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:linear-gradient(90deg,var(--c) var(--pct),var(--ln2) var(--pct))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:22px;margin-top:-9px;background:var(--paper);border:2px solid var(--c);border-radius:2px}
+input[type=range]::-moz-range-track{height:4px;background:var(--ln2)}
+input[type=range]::-moz-range-progress{height:4px;background:var(--c)}
+input[type=range]::-moz-range-thumb{width:14px;height:20px;background:var(--paper);border:2px solid var(--c);border-radius:2px}
+
+/* заключение */
+.kpi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 18px;align-items:center;padding:16px}
+@media (max-width:420px){.kpi{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}}
+.ring{width:150px;height:150px}
+.rt{fill:none;stroke:var(--ln);stroke-width:12}
+.rk{fill:none;stroke:var(--paper);stroke-width:14;stroke-dasharray:1.5 11.4}
+.rf{fill:none;stroke:var(--st);stroke-width:12;transition:stroke-dasharray .35s var(--ease),stroke .3s}
+.r-l{font:600 11px var(--fm);fill:var(--mu);letter-spacing:.2em;text-transform:uppercase}
+.r-n{font:700 34px var(--fd);fill:var(--ink)}
+.kpi h3{margin:0;font:700 clamp(18px,2vw,22px)/1.15 var(--fd);color:var(--st);text-transform:uppercase}
+.kpi h3.flip{animation:flip .4s var(--ease)}
+@keyframes flip{from{opacity:0;transform:translateY(8px)}}
+.kpi p{margin:8px 0 0;color:var(--mu);font-size:14px} .kpi p b{color:var(--ink);font-weight:600}
+.kpi .dv{font:600 12.5px var(--fm);margin-top:10px;display:inline-block;padding:5px 9px;border:1.5px solid var(--ln2);border-radius:var(--r)}
+.bar+.bar{margin-top:14px}
+.bar .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;font-size:13.5px;font-weight:500}
+.bar .row i{display:inline-block;width:10px;height:10px;margin-right:8px;background:color-mix(in srgb,var(--c) var(--cm),var(--ink))}
+.bar .row em{font:500 12px var(--fm);font-style:normal;color:var(--mu);font-variant-numeric:tabular-nums;white-space:nowrap}
+.track{position:relative;height:10px;background:var(--paper2);border:1px solid var(--ln);overflow:hidden}
+.track::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--bad)}
+.fill{height:100%;width:0;transition:width .3s var(--ease)}
+
+/* советы */
+.adv{display:grid;gap:8px}
+.adv-i{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 12px;border:1.5px solid var(--ln);border-radius:var(--r)}
+.adv-i b{font-weight:600;font-size:14px}
+.adv-i span{grid-column:1;font:500 12.5px var(--fm);color:var(--mu)}
+.adv-i span em{font-style:normal;color:var(--acc)}
+.adv-i button{grid-row:1/3;grid-column:2}
+.adv-ok{margin:0;padding:12px;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 9%,var(--paper));font-size:14px}
+.mini{border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:var(--r);padding:7px 11px;font:600 12px var(--fm);text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
+.mini:hover{background:var(--ink);color:var(--paper)}
+.mini.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.mini.pri:hover{background:var(--acc2)}
+
+/* графики */
+.ro{margin:0 0 8px;font:500 13px var(--fm);color:var(--mu)} .ro b{color:var(--acc);font-weight:600}
+.chart{display:block;width:100%;height:auto;touch-action:pan-y}
+#chart{cursor:crosshair}
+.gl{stroke:var(--ln);stroke-width:1} .tx{font:500 12px var(--fm);fill:var(--mu)} .tx-l{font:600 12px var(--fb)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0;font:500 12px var(--fm);color:var(--mu)}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.d{border-top-style:dashed;border-color:var(--bad)} .legend i.p{border-top-style:dotted;border-color:var(--mu)}
+
+/* журнал */
+.jt-wrap{overflow-x:auto;border:1.5px solid var(--ln2);border-radius:var(--r)}
+table.jt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
+.jt th{text-align:left;font:600 10.5px var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--mu);padding:9px 10px;border-bottom:1.5px solid var(--ln2);background:var(--paper2);white-space:nowrap}
+.jt td{padding:9px 10px;border-bottom:1px solid var(--ln);vertical-align:middle}
+.jt tr:last-child td{border-bottom:0}
+.jt td.n{font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+.jt .tg{display:inline-block;font:600 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor;border-radius:2px}
+.jt .act{display:flex;gap:6px;justify-content:flex-end}
+.jt .empty{color:var(--mu);text-align:center;padding:20px}
+.jbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.jbar .msg{font:500 12.5px var(--fm);color:var(--ok)}
+.proto{width:100%;min-height:0;height:1px;opacity:0;position:absolute;left:-9999px}
+
+/* как считается */
+.how>summary{cursor:pointer;list-style:none;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;font:600 12px var(--fm);letter-spacing:.14em;text-transform:uppercase}
+.how>summary::-webkit-details-marker{display:none}
+.how>summary .chev{color:var(--acc);width:20px;height:20px;transition:transform .25s}
+.how[open]>summary .chev{transform:rotate(180deg)}
+.how>summary span{display:inline-flex;align-items:center;gap:10px}
+.how>summary span .ic{color:var(--acc);width:18px;height:18px}
+.how-b{display:grid;gap:10px;font-size:14px;color:var(--mu);max-width:84ch;padding:0 16px 18px}
+.how-b p{margin:0} .how-b code{font:500 12.5px var(--fm);color:var(--ink);background:var(--paper2);border:1px solid var(--ln);padding:1px 6px;border-radius:2px}
+
+/* штамп */
+.stamp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:2px solid var(--ink);background:var(--paper);font:500 12px var(--fm);border-radius:var(--r);overflow:hidden}
+.stamp>div{padding:8px 10px;border-right:1px solid var(--ln2);border-bottom:1px solid var(--ln2);min-width:0}
+.stamp>div span{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+.stamp .big{grid-column:span 3;grid-row:span 2;display:flex;flex-direction:column;justify-content:center;font:700 clamp(14px,1.8vw,20px)/1.15 var(--fd);text-transform:uppercase}
+.stamp .big small{font:500 12px var(--fb);text-transform:none;color:var(--mu);margin-top:4px}
+.stamp>div:nth-child(3n+4){border-right:0}
+@media (max-width:640px){.stamp{grid-template-columns:repeat(3,minmax(0,1fr))}.stamp .big{grid-column:1/-1;grid-row:auto;border-right:0}.stamp>div:nth-child(3n+4){border-right:1px solid var(--ln2)}.stamp>div:nth-child(3n+1){border-right:0}}
+
+/* удар при разрыве */
+.flashfx{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,255,255,.3),rgba(255,61,94,.4) 45%,rgba(120,0,20,.55) 100%)}
+.flashfx.go{animation:boom .8s ease-out}
+@keyframes boom{0%{opacity:1}100%{opacity:0}}
+body.shake .wrap{animation:shake .35s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-6px,3px)}40%,60%{transform:translate(6px,-2px)}}
+
+/* мобильный док */
+.dock{display:none}
+@media (max-width:760px){
+  .wrap{padding-bottom:110px}
+  .sh-h small.hint{display:none}
+  .console .run{display:none}
+  .dock{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;align-items:center;gap:10px;padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--paper);border-top:2px solid var(--ink)}
+  .dock .ds{flex:1;min-width:0;display:grid;line-height:1.15}
+  .dock .ds b{font:700 20px var(--fd);color:var(--st)}
+  .dock .ds span{font:500 11px var(--fm);color:var(--mu);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dock .run{min-height:50px;padding:0 18px;font-size:13px;box-shadow:3px 3px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:60;transform:translateY(160%);width:min(420px,calc(100vw - 32px));padding:14px 16px;border-radius:var(--r);background:var(--paper);border:2px solid var(--bad);box-shadow:6px 6px 0 var(--bad);transition:transform .35s var(--ease),visibility .35s;visibility:hidden;display:grid;gap:10px}
+.toast.on{transform:none;visibility:visible}
+@media (max-width:760px){.toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}}
+.toast h4{margin:0;font:700 17px/1.15 var(--fd);text-transform:uppercase;color:var(--bad)}
+.toast p{margin:0;color:var(--mu);font-size:14px}.toast p b{color:var(--ink)}
+.toast .acts{display:flex;gap:8px}
+.toast button{flex:1}
+
+/* кнопки: клавиши пульта */
+.ghost,.mini,.step,.chip,.toast button{border:1px solid var(--ln);background:linear-gradient(180deg,var(--key),var(--key2));color:var(--ink);border-radius:10px;box-shadow:0 2px 0 var(--edge),0 1px 3px rgba(0,0,0,.06);transition:transform .12s,box-shadow .12s,border-color .2s,filter .2s}
+.ghost:hover,.mini:hover,.step:hover,.chip:hover,.toast button:hover{border-color:var(--ln2);background:linear-gradient(180deg,var(--key),var(--key));color:var(--ink);transform:translateY(-1px);box-shadow:0 3px 0 var(--edge),0 6px 14px -6px rgba(0,0,0,.25)}
+.ghost:active,.mini:active,.step:active,.chip:active,.toast button:active{transform:translateY(2px);box-shadow:0 0 0 var(--edge)}
+.ghost{border-radius:12px;padding:10px 15px}
+.snd{border-radius:50%;width:44px;height:44px;min-width:44px;padding:0}
+.mini{padding:8px 13px;font:600 12.5px var(--fb);text-transform:none;letter-spacing:0}
+.mini.pri,.toast button.pri,.mini.pri:hover,.toast button.pri:hover{background:linear-gradient(180deg,var(--acc2),var(--acc));border-color:var(--acc-edge);color:var(--acc-ink);box-shadow:0 2px 0 var(--acc-edge)}
+.mini.pri:hover,.toast button.pri:hover{filter:brightness(1.06);box-shadow:0 3px 0 var(--acc-edge)}
+.mini.pri:active,.toast button.pri:active{box-shadow:0 0 0 var(--acc-edge)}
+.step{border-radius:50%}
+.chip{padding:9px 13px}
+.chip[aria-pressed="true"],.chip[aria-pressed="true"]:hover{background:var(--ink);border-color:var(--ink);color:var(--paper);transform:translateY(1px);box-shadow:0 1px 0 var(--edge),inset 0 2px 5px rgba(0,0,0,.3)}
+#pick-j .chip{border-radius:14px;padding:14px}
+#pick-j .chip[aria-pressed="true"],#pick-j .chip[aria-pressed="true"]:hover{background:linear-gradient(180deg,var(--acc2),var(--acc));border-color:var(--acc-edge);color:var(--acc-ink);transform:translateY(1px);box-shadow:0 2px 0 var(--acc-edge),inset 0 1px 0 rgba(255,255,255,.35)}
+.run{border:0;border-radius:999px;padding:0 30px 0 10px;min-height:64px;gap:14px;color:var(--acc-ink);background:linear-gradient(180deg,var(--acc2),var(--acc) 62%);box-shadow:0 5px 0 var(--acc-edge),0 14px 26px -10px var(--acc),inset 0 1px 0 rgba(255,255,255,.4);font:700 14px/1 var(--fd);transition:transform .12s,box-shadow .12s,filter .2s}
+.run:hover{background:linear-gradient(180deg,var(--acc2),var(--acc) 62%);filter:brightness(1.07);transform:translateY(-1px)}
+.run:active{transform:translateY(4px);box-shadow:0 1px 0 var(--acc-edge),0 4px 10px -6px var(--acc),inset 0 1px 0 rgba(255,255,255,.4)}
+.run .ic{width:44px;height:44px;padding:13px;border-radius:50%;background:rgba(255,255,255,.24);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+.run[data-on="true"]{background:linear-gradient(180deg,#ff7085,var(--bad) 62%);box-shadow:0 5px 0 #8f1427,inset 0 1px 0 rgba(255,255,255,.35);color:#fff;animation:none}
+.tabs{gap:4px;margin:12px 12px 0;padding:4px;background:var(--paper2);border:1px solid var(--ln);border-radius:12px}
+.tab{border:0;margin:0;border-radius:9px;padding:9px 13px;transition:color .2s,background .2s,box-shadow .2s}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 0 var(--edge),0 3px 8px -3px rgba(0,0,0,.2)}
+.tab[aria-selected="true"] .ic{color:var(--acc)}
+.pill{border-radius:999px}
+.sel{border-radius:10px;border-width:1px;box-shadow:0 2px 0 var(--edge)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px;box-shadow:0 0 0 1.5px var(--ln2)}
+.console{grid-template-columns:minmax(0,1fr) auto}.console .tiles{grid-column:1/-1}
+.chip[aria-pressed="true"] .sw{box-shadow:0 0 0 1.5px var(--paper)}
+@media (max-width:1000px){.console{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.dock .run{padding:0 18px 0 6px;min-height:54px;font-size:13px;box-shadow:0 4px 0 var(--acc-edge)}.dock .run .ic{width:40px;height:40px;padding:12px}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.8v14.4a1 1 0 0 0 1.5.86l11.6-7.2a1 1 0 0 0 0-1.72L8.5 3.94A1 1 0 0 0 7 4.8z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8.3"/><path d="M3 3.5V8.3h4.8"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/><path d="M12 7.5v6M9 10.5h6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-load" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8.3"/><path d="M3 3.5V8.3h4.8"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16h8M7 11.5h12M7 7h5"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5a2.5 2.5 0 0 0 2.5 2.5H20"/><path d="M9 7h6"/></symbol>
+    <symbol id="i-sigma" viewBox="0 0 24 24"><path d="M18 7V4H6l6 8-6 8h12v-3"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12.5 5.5 12 2.5c-.5 3-2 5-4 6.5S5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+    <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 7c2 0 2-2 5-2s3 2 5 2 2-2 5-2 3 2 5 2"/><path d="M2 13c2 0 2-2 5-2s3 2 5 2 2-2 5-2 3 2 5 2"/><path d="M2 19c2 0 2-2 5-2s3 2 5 2 2-2 5-2 3 2 5 2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="m4 4 7 17 2.5-7.5L21 11z"/></symbol>
+    <symbol id="j-glue" viewBox="0 0 24 24"><path d="M2 10h5M2 14h5M17 10h5M17 14h5"/><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 10v.01M14 14v.01M12 12v.01M14 10v.01M10 14v.01"/></symbol>
+    <symbol id="j-thread" viewBox="0 0 24 24"><path d="M2 10h5M2 14h5M17 10h5M17 14h5"/><rect x="7" y="5.5" width="10" height="13" rx="1.5"/><path d="m9 9.5 6-2M9 13l6-2M9 16.5l6-2"/></symbol>
+    <symbol id="j-flange" viewBox="0 0 24 24"><rect x="7.5" y="3" width="3.5" height="18" rx="1"/><rect x="13" y="3" width="3.5" height="18" rx="1"/><path d="M2 10h5.5M2 14h5.5M16.5 10H22M16.5 14H22M6 6.5h12M6 17.5h12"/></symbol>
+    <symbol id="j-weld" viewBox="0 0 24 24"><path d="M2 8.5h8M2 15.5h8M14 8.5h8M14 15.5h8"/><path d="M12 5.5l-1.6 2.2 3.2 2.2-3.2 2.2 3.2 2.2-3.2 2.2 1.6 2.2"/></symbol>
+    <symbol id="j-press" viewBox="0 0 24 24"><path d="M2 10h20M2 14h20"/><rect x="6" y="6.5" width="12" height="11" rx="2"/><path d="M9 6.5V3.5M15 6.5V3.5M9 20.5v-3M15 20.5v-3M7.5 3.5h3M13.5 3.5h3M7.5 20.5h3M13.5 20.5h3"/></symbol>
+  </defs>
+</svg>
+<div class="flashfx" id="flashfx" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><h4>Отказ соединения</h4><p id="t-txt"></p><div class="acts"><button class="mini pri" id="t-again" type="button"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Повторить испытание</button><button class="mini" id="t-close" type="button"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg>Закрыть</button></div></div>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Расчётный стенд <span>· баллон под давлением · гидроудар</span></div>
+      <h1>Стык под <em>давлением</em></h1>
+      <p>Баллон с крышкой стоит на нефтепроводе. Выберите, чем крышка держится, из чего сделан баллон и как резко перекрывают поток. Стенд покажет, при какой скорости нефти крышку сорвёт или корпус лопнет, и что его спасёт.</p>
+    </div>
+    <div class="tr">
+      <div class="pill" id="pill" role="status" aria-live="polite"><i></i><span id="pill-t">Запас в норме</span></div>
+      <button class="ghost snd" id="snd" type="button" aria-label="Звук"><svg class="ic" aria-hidden="true"><use href="#i-mute"/></svg></button>
+      <button class="ghost" id="reset" type="button"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Сбросить</button>
+    </div>
+  </header>
+
+  <section class="sheet stage" aria-label="Стык трубопровода">
+    <div class="sh-h"><h2 id="st-title">Стык</h2><small class="hint"><svg class="ic" aria-hidden="true"><use href="#i-cursor"/></svg>Наведите на деталь, чтобы увидеть её нагрузку</small></div>
+    <div class="view" id="view">
+      <canvas id="cv" role="img" aria-label="Стык труб"></canvas>
+      <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+      <div class="tip" id="tip"><b></b><span></span><span></span></div>
+    </div>
+    <div class="console">
+      <div id="d-v"></div>
+      <button class="run" id="run" type="button" data-on="false"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Испытать до разрыва</button>
+      <div class="tiles">
+        <div class="tile"><span><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg>Давление при ударе</span><b id="m-pmax"></b></div>
+        <div class="tile"><span><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg>Скачок давления</span><b id="m-dp"></b></div>
+        <div class="tile"><span><svg class="ic" aria-hidden="true"><use href="#i-waves"/></svg>Скорость волны</span><b id="m-a"></b></div>
+        <div class="tile t-v"><span><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg>Критическая скорость</span><b id="m-vc"></b></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="sheet" aria-label="Исходные данные">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="t-j" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg>Соединение</button>
+        <button class="tab" role="tab" data-tab="t-m" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Материалы</button>
+        <button class="tab" role="tab" data-tab="t-g" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-ruler"/></svg>Размеры</button>
+        <button class="tab" role="tab" data-tab="t-r" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg>Режим</button>
+        <button class="tab" role="tab" data-tab="t-f" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-drop"/></svg>Среда</button>
+      </div>
+      <div class="tabp" id="t-j">
+        <div><p class="sub">Тип соединения</p><div class="chips" id="pick-j"></div><p class="note" id="j-note"></p></div>
+        <div data-j="glue"><p class="sub">Клей</p><div class="chips" id="pre-g"></div></div>
+        <div data-j="flange"><p class="sub">Класс прочности болтов</p><div class="chips" id="pre-b"></div></div>
+        <div data-j="weld"><p class="sub">Качество сварки</p><div class="chips" id="pre-w"></div></div>
+        <div class="pgrid" id="pg-j"></div>
+      </div>
+      <div class="tabp" id="t-m" hidden>
+        <div class="pick2">
+          <div>
+            <p class="sub">Корпус баллона (A) · <b id="nmA"></b></p>
+            <div class="chips" id="pick-mA"></div>
+            <div id="gwA" style="margin-top:12px"><p class="sub">Марка стали корпуса</p><select class="sel" id="gA" aria-label="Марка стали трубы A"></select></div>
+          </div>
+          <div>
+            <p class="sub">Крышка (B) · <b id="nmB"></b></p>
+            <div class="chips" id="pick-mB"></div>
+            <div id="gwB" style="margin-top:12px"><p class="sub">Марка стали крышки</p><select class="sel" id="gB" aria-label="Марка стали трубы B"></select></div>
+          </div>
+        </div>
+        <div class="pgrid" id="pg-m"></div>
+      </div>
+      <div class="tabp" id="t-g" hidden>
+        <div><p class="sub">Типоразмер</p><div class="chips" id="pre-d"></div></div>
+        <div class="pgrid" id="pg-g"></div>
+      </div>
+      <div class="tabp" id="t-r" hidden>
+        <div><p class="sub">Сценарии</p><div class="chips" id="scen"></div></div>
+        <div class="pgrid"><div id="d-p"></div><div id="d-tc"></div></div>
+        <p class="cap">Чем быстрее перекрывают поток, тем сильнее гидроудар. Закрытие дольше времени пробега волны (2L/a) удар смягчает.</p>
+      </div>
+      <div class="tabp" id="t-f" hidden>
+        <div><p class="sub">Что течёт по линии</p><div class="chips" id="pre-f"></div></div>
+        <div class="pgrid" id="pg-f"></div>
+        <p class="cap">Тяжелее и жёстче жидкость, тем быстрее идёт волна и сильнее удар. Вода даёт удар заметно сильнее нефти.</p>
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="sheet" aria-label="Заключение">
+        <div class="sh-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg>Заключение</h2></div>
+        <div class="kpi">
+          <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="rt" cx="100" cy="100" r="82"/>
+            <circle class="rf" id="rf" cx="100" cy="100" r="82" transform="rotate(-90 100 100)" stroke-dasharray="0 600"/>
+            <circle class="rk" cx="100" cy="100" r="82"/>
+            <text class="r-l" x="100" y="84" text-anchor="middle">запас</text>
+            <text class="r-n" id="sf" x="100" y="124" text-anchor="middle">×2,22</text>
+          </svg>
+          <div>
+            <h3 id="k-title">Запас в норме</h3>
+            <p id="k-weak"></p>
+            <div class="dv" id="k-dv"></div>
+          </div>
+        </div>
+      </section>
+      <section class="sheet" aria-labelledby="h-bars">
+        <div class="sh-h"><h2 id="h-bars"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg>Загрузка элементов</h2></div>
+        <div class="sh-b" id="bars"></div>
+      </section>
+      <section class="sheet" aria-labelledby="h-adv">
+        <div class="sh-h"><h2 id="h-adv"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg>Как довести до нормы</h2></div>
+        <div class="sh-b"><div class="adv" id="adv"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="duo">
+    <section class="sheet" aria-labelledby="h-chart">
+      <div class="sh-h"><h2 id="h-chart"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Давление при остановке потока</h2><small>нажмите, чтобы выбрать скорость</small></div>
+      <div class="sh-b">
+        <p class="ro" id="ro"></p>
+        <svg id="chart" class="chart" viewBox="0 0 640 300" role="img" aria-label="График давления в зависимости от скорости течения с пределами прочности элементов"></svg>
+        <p class="cap" style="margin-top:10px">Сплошная линия: давление в трубе при остановке потока на данной скорости. Пунктиры: давление, при котором отказывает каждый элемент. Пересечение с нижним пунктиром даёт критическую скорость.</p>
+      </div>
+    </section>
+    <section class="sheet" aria-labelledby="h-pt">
+      <div class="sh-h"><h2 id="h-pt"><svg class="ic" aria-hidden="true"><use href="#i-pulse"/></svg>Волна гидроудара у задвижки</h2></div>
+      <div class="sh-b">
+        <p class="ro" id="pt-ro"></p>
+        <svg id="pt" class="chart" viewBox="0 0 560 300" role="img" aria-label="Давление у задвижки во времени после закрытия"></svg>
+        <div class="legend"><span><i></i>давление у задвижки</span><span><i class="d"></i>предел слабого элемента</span><span><i class="p"></i>рабочее давление</span></div>
+        <p class="cap" style="margin-top:8px">Упрощённая картина: волна бегает по трубе с периодом 4L/a и постепенно затухает. Провал ниже нуля невозможен, там жидкость вскипает (кавитация).</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="sheet" aria-labelledby="h-log">
+    <div class="sh-h"><h2 id="h-log"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>Журнал испытаний</h2><small>хранится в этом браузере</small></div>
+    <div class="sh-b">
+      <div class="jbar">
+        <button class="mini pri" id="j-add" type="button"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg>Записать текущий вариант</button>
+        <button class="mini" id="j-copy" type="button"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>Скопировать протокол</button>
+        <button class="mini" id="j-clear" type="button"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Очистить журнал</button>
+        <span class="msg" id="j-msg" role="status"></span>
+      </div>
+      <div class="jt-wrap"><table class="jt"><thead><tr><th>Время</th><th>Запись</th><th>Соединение и трубы</th><th>v крит.</th><th>Запас</th><th></th></tr></thead><tbody id="j-rows"></tbody></table></div>
+      <textarea class="proto" id="proto" aria-hidden="true" tabindex="-1" readonly></textarea>
+    </div>
+  </section>
+
+  <details class="sheet how">
+    <summary><span><svg class="ic" aria-hidden="true"><use href="#i-sigma"/></svg>Как это считается</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+    <div class="how-b">
+      <p>Баллон с крышкой стоит на линии. Когда задвижку перекрывают, волна давления приходит в него целиком. Корпус и крышка считаются как тонкостенные цилиндры, крышка держится на выбранном соединении. Если не выдерживает соединение, крышку срывает; если стенка, корпус или крышка трескаются.</p>
+      <p>Сама по себе скорость стык не рвёт. Нагрузку даёт давление, а при резкой остановке потока оно подскакивает.</p>
+      <p>Скачок давления (формула Жуковского): <code>Δp = ρ·a·v</code>. Если задвижку закрывают дольше, чем <code>2L/a</code>, удар делится на отношение времени закрытия к <code>2L/a</code>.</p>
+      <p>Скорость волны: <code>a = √( (K/ρ) / (1 + K·D/(E·e)) )</code>, берётся бóльшее значение из труб A и B. K задаётся на вкладке «Среда»: нефть около 1,5 ГПа, вода 2,2 ГПа. E из выбранного материала: сталь 210 ГПа, нержавейка 200, чугун ВЧ 170, стеклопластик 20, ПВХ 3, ПЭ около 1.</p>
+      <p>Стенки труб: <code>σ = p·Dнар / (2·e)</code> (формула Барлоу по наружному диаметру) против предела текучести (сталь, по марке) или кратковременной прочности (пластики, стеклопластик).</p>
+      <p>Клеевой раструб: торцевая сила <code>F = p·π·D²/4</code> делится на площадь склейки <code>π·Dнар·L</code>.</p>
+      <p>Резьбовая муфта: срез витков <code>τ = F / (0,5·π·Dнар·L)</code> против <code>0,6·σ</code> слабейшего материала, и стенка в корне резьбы, тоньше на глубину нарезки (до 1,8 мм).</p>
+      <p>Фланец: болты держат гидростатическую силу и обжатие прокладки по ASME VIII Div.1, прил. 2: <code>W = p·π·G²/4 + 2·b·π·G·m·p</code>, где G ≈ Dнар + 24 мм, b = 6 мм, m = 3 (спирально-навитая прокладка). Площадь болта <code>π·(0,85·d)²/4</code>.</p>
+      <p>Сварной встык: окружное напряжение в шве и зоне термического влияния, прочность умножена на коэффициент качества шва φ.</p>
+      <p>Обжимная муфта: трение уплотнений <code>μ·pобж·π·Dнар·L</code> против торцевой силы. Без упора такие муфты выдёргиваются первыми.</p>
+      <p>Запас прочности: предельное давление самого слабого элемента, делённое на максимальное давление в трубе. Нормативный запас для нефтепровода принят 1/0,72 ≈ 1,39 (расчётный коэффициент 0,72 по ASME B31.4). Предел здесь это текучесть, поэтому «отказ» означает начало пластической деформации; фактический разрыв наступит при пределе прочности, обычно на 20–40 % выше.</p>
+      <p>Подсказки «Как довести до нормы» перебирают по одному параметру и ищут ближайшее значение, при котором запас достигает 1,39.</p>
+      <p>Не учтены: коэффициент закрепления трубы в скорости волны (принят 1), температурные напряжения, изгиб, коррозионный износ стенки и усталость. Волна на графике во времени показана упрощённо.</p>
+      <p>Это учебная упрощённая модель: тонкая стенка, трубопровод не закреплён. Для реального проекта нужен расчёт по нормам (СП 36.13330, ISO 14692, ASME B31.4) и испытания.</p>
+    </div>
+  </details>
+
+  <footer class="stamp" aria-label="Штамп листа">
+    <div class="big">Стык под давлением<small>Расчётный стенд, учебная модель</small></div>
+    <div><span>Лит.</span>У</div><div><span>Масса</span>—</div><div><span>Масштаб</span>1:1</div>
+    <div><span>Лист</span>1</div><div><span>Листов</span>1</div><div><span>Нормы</span>B31.4</div>
+  </footer>
+</div>
+<div class="dock" aria-label="Быстрые действия"><div class="ds"><b id="dock-sf">×2,22</b><span id="dock-t"></span></div><button class="run" id="dock-run" type="button" data-on="false"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Испытать</button></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const fmt = (n, d = 1) => n.toLocaleString('ru-RU', {minimumFractionDigits: d, maximumFractionDigits: d});
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- каталоги ---------- */
+const MAT = {
+  steel: {name: 'Сталь', E: 210, s: 245, c: '#5cc8ff', weld: 'steel', grad: ['#42546a', '#9db3c9', '#e4eff9', '#8ea5bc', '#37485b']},
+  iron:  {name: 'Чугун ВЧ', sub: 'ВЧШГ', E: 170, s: 300, c: '#a9b4c4', weld: null, grad: ['#23282f', '#59626f', '#8a93a0', '#4b525d', '#1d2127']},
+  grp:   {name: 'Стеклопластик', sub: 'GRP', E: 20, s: 150, c: '#c9f23d', weld: null, grad: ['#85a51a', '#e6fb7e', '#6a870f']},
+  pe100: {name: 'ПЭ100', E: 1.1, s: 22, c: '#7aa8ff', weld: 'pe', grad: ['#0d0f14', '#3e4552', '#14171e']},
+  pe80:  {name: 'ПЭ80', E: 0.8, s: 17, c: '#9db8ff', weld: 'pe', grad: ['#111318', '#4a5160', '#191c23']},
+  pvc:   {name: 'ПВХ-У', E: 3, s: 45, c: '#dfe4ec', weld: null, grad: ['#7d838e', '#e9edf3', '#6f7580']},
+  pp:    {name: 'ПП-Р', E: 0.9, s: 25, c: '#7ee0c0', weld: 'pp', grad: ['#1f6b52', '#8fe0c0', '#185842']}
+};
+const GRADES = [
+  {id: 'st3', name: 'Ст3сп', s: 245, g: 'Углеродистые (ГОСТ)'},
+  {id: 'st20', name: 'Сталь 20', s: 245, g: 'Углеродистые (ГОСТ)'},
+  {id: '09g2s', name: '09Г2С', s: 345, g: 'Низколегированные (ГОСТ)'},
+  {id: '17gs', name: '17ГС', s: 345, g: 'Низколегированные (ГОСТ)'},
+  {id: '17g1s', name: '17Г1С', s: 355, g: 'Низколегированные (ГОСТ)'},
+  {id: '13hfa', name: '13ХФА', s: 360, g: 'Низколегированные (ГОСТ)'},
+  {id: 'k60', name: 'К60 (10Г2ФБЮ)', s: 485, g: 'Низколегированные (ГОСТ)'},
+  {id: 'x42', name: 'API 5L X42', s: 290, g: 'API 5L'},
+  {id: 'x46', name: 'API 5L X46', s: 317, g: 'API 5L'},
+  {id: 'x52', name: 'API 5L X52', s: 359, g: 'API 5L'},
+  {id: 'x56', name: 'API 5L X56', s: 386, g: 'API 5L'},
+  {id: 'x60', name: 'API 5L X60', s: 414, g: 'API 5L'},
+  {id: 'x65', name: 'API 5L X65', s: 448, g: 'API 5L'},
+  {id: 'x70', name: 'API 5L X70', s: 483, g: 'API 5L'},
+  {id: 'x80', name: 'API 5L X80', s: 552, g: 'API 5L'},
+  {id: '12h18', name: '12Х18Н10Т', s: 196, E: 200, g: 'Нержавеющие'},
+  {id: '08h18', name: '08Х18Н10Т', s: 196, E: 200, g: 'Нержавеющие'},
+  {id: 'aisi316', name: 'AISI 316L', s: 170, E: 193, g: 'Нержавеющие'}
+];
+const GR = Object.fromEntries(GRADES.map(g => [g.id, g]));
+const JOINTS = {
+  glue:   {name: 'Клеевой раструб', sub: 'раструб с клеем'},
+  thread: {name: 'Резьбовая муфта', sub: 'муфта на резьбе'},
+  flange: {name: 'Фланцевое', sub: 'фланцы на болтах'},
+  weld:   {name: 'Сварное встык', sub: 'стыковой шов'},
+  press:  {name: 'Обжимная муфта', sub: 'механическая, на уплотнениях'}
+};
+
+const SPEC = {
+  v:   {min: 0.1, max: 12,   step: 0.1,  d: 1, unit: 'м/с',   label: 'Скорость течения нефти'},
+  p:   {min: 0.5, max: 10,   step: 0.1,  d: 1, unit: 'МПа',   label: 'Рабочее давление'},
+  tc:  {min: 0.05, max: 10,  step: 0.05, d: 2, unit: 'с',     label: 'Время закрытия задвижки'},
+  D:   {min: 50,  max: 1000, step: 10,   d: 0, unit: 'мм',    label: 'Внутренний диаметр'},
+  L:   {min: 10,  max: 5000, step: 10,   d: 0, unit: 'м',     label: 'Длина трубопровода'},
+  eA:  {min: 2,   max: 40,   step: 0.5,  d: 1, unit: 'мм',    label: 'Стенка корпуса A'},
+  eB:  {min: 2,   max: 40,   step: 0.5,  d: 1, unit: 'мм',    label: 'Стенка крышки B'},
+  sA:  {min: 5,   max: 700,  step: 1,    d: 0, unit: 'МПа',   label: 'Прочность материала A'},
+  sB:  {min: 5,   max: 700,  step: 1,    d: 0, unit: 'МПа',   label: 'Прочность материала B'},
+  EA:  {min: 0.5, max: 250,  step: 0.1,  d: 1, unit: 'ГПа',   label: 'Модуль упругости A'},
+  EB:  {min: 0.5, max: 250,  step: 0.1,  d: 1, unit: 'ГПа',   label: 'Модуль упругости B'},
+  Lo:  {min: 20,  max: 300,  step: 5,    d: 0, unit: 'мм',    label: 'Длина нахлёста / резьбы / посадки', j: ['glue', 'thread', 'press']},
+  tau: {min: 1,   max: 40,   step: 0.5,  d: 1, unit: 'МПа',   label: 'Прочность клея на сдвиг', j: ['glue']},
+  nb:  {min: 4,   max: 40,   step: 1,    d: 0, unit: 'шт',    label: 'Число болтов', j: ['flange']},
+  db:  {min: 10,  max: 48,   step: 1,    d: 0, unit: 'мм',    label: 'Диаметр болта (М)', j: ['flange']},
+  sb:  {min: 200, max: 1100, step: 10,   d: 0, unit: 'МПа',   label: 'Предел текучести болтов', j: ['flange']},
+  phi: {min: 0.5, max: 1,    step: 0.05, d: 2, unit: '',      label: 'Коэффициент качества шва φ', j: ['weld']},
+  pc:  {min: 1,   max: 40,   step: 0.5,  d: 1, unit: 'МПа',   label: 'Давление обжатия уплотнений', j: ['press']},
+  mu:  {min: 0.1, max: 0.6,  step: 0.01, d: 2, unit: '',      label: 'Коэффициент трения μ', j: ['press']},
+  rho: {min: 700, max: 1050, step: 5,    d: 0, unit: 'кг/м³', label: 'Плотность жидкости'},
+  K:   {min: 0.8, max: 2.6,  step: 0.05, d: 2, unit: 'ГПа',   label: 'Модуль сжатия жидкости K'}
+};
+const DEFAULTS = {v: 1.5, p: 2.5, tc: 0.5, D: 200, eA: 8, eB: 6, sA: 245, sB: 359, EA: 210, EB: 210, Lo: 60, tau: 8, nb: 8, db: 20, sb: 640, phi: 0.85, pc: 10, mu: 0.3, rho: 850, L: 500, K: 1.5};
+const MDEF = {joint: 'glue', mA: 'steel', mB: 'steel', gA: 'st20', gB: 'x52'};
+const S = Object.assign({}, DEFAULTS), M = Object.assign({}, MDEF);
+const STORE = 'muft-v4';
+try {
+  const raw = JSON.parse(localStorage.getItem(STORE) || 'null');
+  if (raw && raw.S) for (const k in DEFAULTS) if (typeof raw.S[k] === 'number' && isFinite(raw.S[k])) S[k] = clamp(raw.S[k], SPEC[k].min, SPEC[k].max);
+  if (raw && raw.M) {
+    if (JOINTS[raw.M.joint]) M.joint = raw.M.joint;
+    if (MAT[raw.M.mA]) M.mA = raw.M.mA; if (MAT[raw.M.mB]) M.mB = raw.M.mB;
+    if (GR[raw.M.gA]) M.gA = raw.M.gA; if (GR[raw.M.gB]) M.gB = raw.M.gB;
+  }
+} catch (e) {}
+const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({S, M})); } catch (e) {} };
+
+const matName = side => M['m' + side] === 'steel' ? GR[M['g' + side]].name : MAT[M['m' + side]].name;
+const matCol = side => MAT[M['m' + side]].c;
+
+/* ---------- расчёт ---------- */
+function calc(s, m) {
+  const D = s.D / 1000, K = s.K * 1e9;
+  const aA = Math.sqrt((K / s.rho) / (1 + K * D / (s.EA * 1e9 * s.eA / 1000)));
+  const aB = Math.sqrt((K / s.rho) / (1 + K * D / (s.EB * 1e9 * s.eB / 1000)));
+  const a = Math.max(aA, aB);
+  const T = 2 * s.L / a;
+  const k = Math.min(1, T / s.tc);
+  const dpv = s.rho * a * k / 1e6;
+  const Dout = s.D + 2 * s.eB, D2 = s.D * s.D;
+  const nA = matName('A'), nB = matName('B');
+  const el = [
+    {id: 'wallA', name: 'Корпус A: ' + nA, weak: `корпус баллона A (${nA})`, sym: 'σ', allow: s.sA, lim: 2 * s.eA * s.sA / (s.D + 2 * s.eA), c: matCol('A')},
+    {id: 'wallB', name: 'Крышка B: ' + nB, weak: `крышка B (${nB})`, sym: 'σ', allow: s.sB, lim: 2 * s.eB * s.sB / (s.D + 2 * s.eB), c: matCol('B')}
+  ];
+  const sw = Math.min(s.sA, s.sB);
+  if (m.joint === 'glue') {
+    el.push({id: 'glue', name: 'Клеевой шов', weak: 'клеевой шов в раструбе', sym: 'τ', allow: s.tau, lim: 4 * s.tau * Dout * s.Lo / D2, c: '#a392ff', pull: true});
+  } else if (m.joint === 'thread') {
+    const h = Math.min(0.4 * s.eB, 1.8), ts = 0.6 * sw;
+    el.push({id: 'thr', name: 'Витки резьбы (срез)', weak: 'витки резьбы, срез и выдёргивание', sym: 'τ', allow: ts, lim: 4 * ts * 0.5 * Dout * s.Lo / D2, c: '#ff9ad5', pull: true});
+    el.push({id: 'root', name: 'Крышка B в корне резьбы', weak: 'крышка B в корне резьбы', sym: 'σ', allow: s.sB, lim: 2 * Math.max(0.2, s.eB - h) * s.sB / (s.D + 2 * s.eB), c: '#ffb347'});
+  } else if (m.joint === 'flange') {
+    const Dg = s.D + 2 * Math.max(s.eA, s.eB) + 24, bg = 6, mg = 3, As = Math.PI / 4 * Math.pow(0.85 * s.db, 2);
+    el.push({id: 'bolt', name: `Болты ${s.nb}×М${s.db}`, weak: `болты фланца (${s.nb}×М${s.db})`, sym: 'σ', allow: s.sb, lim: s.nb * As * s.sb / (Math.PI / 4 * Dg * Dg + 2 * bg * Math.PI * Dg * mg), c: '#ffd166', pull: true});
+  } else if (m.joint === 'weld') {
+    el.push({id: 'weld', name: 'Сварной шов и ЗТВ', weak: 'сварной шов и зона термического влияния', sym: 'σ', allow: s.phi * sw, lim: 2 * Math.min(s.eA, s.eB) * s.phi * sw / (s.D + 2 * Math.min(s.eA, s.eB)), c: '#ff8a5c'});
+  } else {
+    el.push({id: 'grip', name: 'Удержание уплотнений', weak: 'уплотнения муфты (крышку выдавливает)', sym: 'τ', allow: s.mu * s.pc, lim: 4 * s.mu * s.pc * Dout * s.Lo / D2, c: '#7cf0e0', pull: true});
+  }
+  const E = {};
+  el.forEach(e => { E[e.id] = e; });
+  const low = el.reduce((a, b) => b.lim < a.lim ? b : a);
+  const pmax = s.p + dpv * s.v;
+  el.forEach(e => { e.u = pmax / e.lim; e.st = e.allow * e.u; });
+  return {a, T, k, dpv, el, E, mode: low.id, pLim: low.lim, pmax, SF: low.lim / pmax, vcrit: Math.max(0, (low.lim - s.p) / dpv), dp: dpv * s.v};
+}
+let C = calc(S, M);
+
+const SF_NORM = 1 / 0.72;
+const stateOf = sf => sf >= SF_NORM * 1.25 ? {key: 'ok', title: 'Запас в норме'} : sf >= SF_NORM ? {key: 'warn', title: 'Запас на границе нормы'} : sf >= 1 ? {key: 'bad', title: 'Ниже нормативного запаса'} : {key: 'rupt', title: 'Отказ стыка'};
+const hue = u => Math.round(140 * (1 - clamp(u, 0, 1)));
+const col = (u, a) => `hsla(${hue(u)},90%,56%,${a == null ? 1 : a})`;
+
+function jointNote() {
+  const A = MAT[M.mA], B = MAT[M.mB], plast = x => x.E < 5;
+  switch (M.joint) {
+    case 'weld':
+      if (!A.weld || A.weld !== B.weld) return 'Эти материалы встык не свариваются. Расчёт условный: в жизни здесь нужен переходник или фланец.';
+      if (A.weld !== 'steel') return 'Для ПЭ и ПП это стыковая сварка нагретым инструментом, φ обычно 0,8–0,9.';
+      return '';
+    case 'glue':
+      if (A.weld === 'pe' || B.weld === 'pe' || A.weld === 'pp' || B.weld === 'pp') return 'ПЭ и ПП клеем практически не соединяются: прочность клея на них близка к нулю.';
+      return '';
+    case 'thread':
+      if (plast(A) || plast(B)) return 'Резьба на пластиковой трубе сильно ослабляет стенку, на давлении так не делают.';
+      if (M.mA === 'grp' || M.mB === 'grp') return 'Резьба на стеклопластике бывает только формованная (резьбовые раструбы API 15HR).';
+      return '';
+    case 'press':
+      return 'Обжимная муфта без упора держит трубу только трением. На рабочем давлении её обычно дополняют упорами.';
+    default: return '';
+  }
+}
+
+/* ---------- ползунки ---------- */
+const dials = {};
+function refreshDial(key) {
+  const d = dials[key], sp = SPEC[key];
+  if (!d) return;
+  d.input.value = S[key];
+  d.out.innerHTML = `${fmt(S[key], sp.d)}<small>${sp.unit}</small>`;
+  d.input.style.setProperty('--pct', ((S[key] - sp.min) / (sp.max - sp.min) * 100).toFixed(2) + '%');
+}
+function setVal(key, val, raw) {
+  const sp = SPEC[key];
+  if (!isFinite(val)) return;
+  val = clamp(val, sp.min, sp.max);
+  if (!raw) val = +(Math.round(val / sp.step) * sp.step).toFixed(4);
+  S[key] = val;
+  refreshDial(key);
+  update();
+  if (!raw) persist();
+}
+function setMany(obj) {
+  for (const k in obj) S[k] = clamp(obj[k], SPEC[k].min, SPEC[k].max);
+  for (const k in obj) refreshDial(k);
+  update();
+  persist();
+}
+function buildDial(key, host, cls) {
+  const sp = SPEC[key];
+  host.className = 'dial ' + (cls || '');
+  if (sp.j) host.dataset.j = sp.j.join(' ');
+  host.innerHTML = `<div class="dial-top"><label for="in-${key}">${sp.label}</label><div class="valbox"><button type="button" class="step" data-d="-1" aria-label="Меньше">−</button><output id="out-${key}" for="in-${key}"></output><button type="button" class="step" data-d="1" aria-label="Больше">+</button></div></div><input type="range" id="in-${key}" min="${sp.min}" max="${sp.max}" step="${sp.step}"><div class="rng"><span>${fmt(sp.min, sp.d)}</span><span>${fmt(sp.max, sp.d)}</span></div>`;
+  const input = host.querySelector('input'), out = host.querySelector('output');
+  dials[key] = {input, out};
+  input.addEventListener('input', () => { stopTest(); setVal(key, parseFloat(input.value)); });
+  host.querySelectorAll('.step').forEach(b => {
+    let t1 = 0, t2 = 0;
+    const act = () => { stopTest(); setVal(key, S[key] + (+b.dataset.d) * sp.step); };
+    const stop = () => { clearTimeout(t1); clearInterval(t2); };
+    b.addEventListener('pointerdown', e => { e.preventDefault(); act(); t1 = setTimeout(() => { t2 = setInterval(act, 70); }, 380); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+  });
+  refreshDial(key);
+}
+
+/* ---------- сценарии, пресеты, выбор ---------- */
+const SCEN = [
+  {name: 'Штатный режим', set: {v: 1.5, p: 2.5, tc: 10}},
+  {name: 'Резкое закрытие', set: {v: 3, p: 3, tc: 0.3}},
+  {name: 'Авария', set: {v: 5.5, p: 3.5, tc: 0.3}}
+];
+const PRE_D = [
+  {name: 'DN100', set: {D: 100, eA: 6, eB: 5, Lo: 50, nb: 8, db: 16}},
+  {name: 'DN200', set: {D: 200, eA: 8, eB: 6, Lo: 60, nb: 8, db: 20}},
+  {name: 'DN300', set: {D: 300, eA: 10, eB: 9, Lo: 80, nb: 12, db: 22}},
+  {name: 'DN500', set: {D: 500, eA: 12, eB: 12, Lo: 120, nb: 20, db: 27}}
+];
+const PRE_G = [
+  {name: 'Слабый', sub: '4 МПа', set: {tau: 4}},
+  {name: 'Обычный', sub: '8 МПа', set: {tau: 8}},
+  {name: 'Усиленный', sub: '14 МПа', set: {tau: 14}},
+  {name: 'Эпоксидный', sub: '22 МПа', set: {tau: 22}}
+];
+const PRE_B = [
+  {name: '4.6', sub: '240 МПа', set: {sb: 240}},
+  {name: '5.6', sub: '300 МПа', set: {sb: 300}},
+  {name: '8.8', sub: '640 МПа', set: {sb: 640}},
+  {name: '10.9', sub: '940 МПа', set: {sb: 940}}
+];
+const PRE_W = [
+  {name: 'Без контроля', sub: 'φ 0,70', set: {phi: 0.7}},
+  {name: 'Выборочный контроль', sub: 'φ 0,85', set: {phi: 0.85}},
+  {name: '100 % УЗК/РК', sub: 'φ 1,00', set: {phi: 1}}
+];
+const chipGroups = [];
+function buildChips(host, list, withSub) {
+  const btns = list.map(item => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip';
+    let sub = item.sub;
+    if (!sub && withSub) sub = Object.keys(item.set).filter(k => SPEC[k].unit === 'мм' || k === 'v' || k === 'p' || k === 'tc').slice(0, 3).map(k => fmt(item.set[k], SPEC[k].d) + ' ' + SPEC[k].unit).join(' · ');
+    b.innerHTML = (item.c ? `<i class="sw" style="background:rgb(${item.c.base.join(',')})"></i>` : '') + item.name + (sub ? `<small>${sub}</small>` : '');
+    b.addEventListener('click', () => { stopTest(); setMany(item.set); });
+    host.appendChild(b);
+    return {b, test: () => Object.keys(item.set).every(k => Math.abs(S[k] - item.set[k]) < 1e-9)};
+  });
+  chipGroups.push(btns);
+}
+function buildPick(host, list, key, onPick) {
+  const btns = Object.keys(list).map(id => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip';
+    b.innerHTML = (list === JOINTS ? `<svg class="ic jic" aria-hidden="true"><use href="#j-${id}"/></svg>` : '') + list[id].name + (list[id].sub ? `<small>${list[id].sub}</small>` : '');
+    b.addEventListener('click', () => { stopTest(); M[key] = id; onPick && onPick(); update(); persist(); });
+    host.appendChild(b);
+    return {b, test: () => M[key] === id};
+  });
+  chipGroups.push(btns);
+}
+function refreshChips() {
+  chipGroups.forEach(g => g.forEach(({b, test}) => b.setAttribute('aria-pressed', test() ? 'true' : 'false')));
+}
+function applyMat(side) {
+  const id = M['m' + side];
+  if (id === 'steel') { const g = GR[M['g' + side]]; S['E' + side] = g.E || 210; S['s' + side] = g.s; }
+  else { S['E' + side] = MAT[id].E; S['s' + side] = MAT[id].s; }
+  refreshDial('E' + side); refreshDial('s' + side);
+}
+function buildGradeSel(side) {
+  const sel = $('g' + side);
+  let html = '', grp = '';
+  GRADES.forEach(g => {
+    if (g.g !== grp) { if (grp) html += '</optgroup>'; grp = g.g; html += `<optgroup label="${grp}">`; }
+    html += `<option value="${g.id}">${g.name} · σт ${g.s} МПа</option>`;
+  });
+  sel.innerHTML = html + '</optgroup>';
+  sel.value = M['g' + side];
+  sel.addEventListener('change', () => { stopTest(); M['g' + side] = sel.value; applyMat(side); update(); persist(); });
+}
+
+/* ---------- панель результатов ---------- */
+const RING = 2 * Math.PI * 82;
+let barsKey = '';
+function renderBars() {
+  const key = C.el.map(e => e.id + e.name).join('|');
+  if (key !== barsKey) {
+    barsKey = key;
+    $('bars').innerHTML = C.el.map(e => `<div class="bar" style="--c:${e.c}"><div class="row"><span><i></i>${e.name}</span><em id="b-${e.id}-t"></em></div><div class="track"><div class="fill" id="b-${e.id}"></div></div></div>`).join('');
+  }
+  C.el.forEach(e => {
+    $('b-' + e.id + '-t').textContent = `${fmt(e.st, e.allow < 30 ? 1 : 0)} из ${fmt(e.allow, e.allow < 30 ? 1 : 0)} МПа`;
+    const f = $('b-' + e.id);
+    f.style.width = clamp(e.u * 100, 1, 100) + '%';
+    f.style.background = col(e.u);
+    f.style.backgroundColor = `hsl(${hue(e.u)},75%,45%)`;
+  });
+}
+function render() {
+  const st = stateOf(C.SF);
+  document.documentElement.dataset.state = st.key;
+  $('pill-t').textContent = st.title;
+  $('k-title').textContent = st.title;
+  $('sf').textContent = '×' + (C.SF > 99 ? '99+' : fmt(C.SF, 2));
+  $('rf').setAttribute('stroke-dasharray', `${(clamp(1 / C.SF, 0.015, 1) * RING).toFixed(1)} ${RING.toFixed(1)}`);
+  $('k-weak').innerHTML = (C.SF < 1 ? 'Первым разрушается: ' : 'Слабое место: ') + `<b>${C.E[C.mode].weak}</b>.`;
+  const dv = C.vcrit - S.v;
+  $('k-dv').textContent = C.vcrit <= 0 ? 'Рвётся даже без потока' : dv >= 0 ? `До разрыва ещё +${fmt(dv, 1)} м/с` : `Выше критической на ${fmt(-dv, 1)} м/с`;
+  $('m-pmax').textContent = fmt(C.pmax, 1) + ' МПа';
+  $('m-dp').textContent = '+' + fmt(C.dp, 1) + ' МПа';
+  $('m-a').textContent = fmt(C.a, 0) + ' м/с';
+  $('m-vc').textContent = C.vcrit > 0 ? fmt(C.vcrit, 1) + ' м/с' : '0 м/с';
+  renderBars();
+  $('ro').innerHTML = `скорость <b>${fmt(S.v, 1)} м/с</b> → давление <b>${fmt(C.pmax, 1)} МПа</b>`;
+  $('st-title').textContent = `${JOINTS[M.joint].name} · ${matName('A')} → ${matName('B')}`;
+  $('nmA').textContent = matName('A'); $('nmB').textContent = matName('B');
+  $('gwA').hidden = M.mA !== 'steel'; $('gwB').hidden = M.mB !== 'steel';
+  $('gA').value = M.gA; $('gB').value = M.gB;
+  $('j-note').textContent = jointNote();
+  document.querySelectorAll('[data-j]').forEach(n => { n.hidden = !n.dataset.j.split(' ').includes(M.joint); });
+  refreshChips();
+  drawChart();
+  cv.setAttribute('aria-label', `Разрез стыка: ${JOINTS[M.joint].name}, ${matName('A')} и ${matName('B')}. ${st.title}, запас прочности ${fmt(C.SF, 2)}.`);
+}
+function update() { C = calc(S, M); render(); renderExtra(); }
+
+/* ---------- график ---------- */
+let chartMap = null;
+function niceTicks(max, n) {
+  const raw = max / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(x => x >= raw);
+  const out = [];
+  for (let t = 0; ; t += step) { out.push(+t.toFixed(6)); if (t >= max) break; }
+  return out;
+}
+function drawChart() {
+  const s = S, c = C, W = 640, H = 300, ml = 50, mr = 16, mt = 26, mb = 46;
+  const xt = niceTicks(clamp(Math.max(10, c.vcrit * 1.35), 10, 60), 6);
+  const vmax = xt[xt.length - 1];
+  const pAt = v => s.p + c.dpv * v;
+  const yt = niceTicks(Math.max(pAt(vmax) * 1.05, c.pLim * 1.3, s.p * 1.3), 5);
+  const ymax = yt[yt.length - 1];
+  const xs = v => ml + (W - ml - mr) * v / vmax;
+  const ys = p => H - mb - (H - mt - mb) * p / ymax;
+  chartMap = {W, ml, mr, vmax};
+  let o = '';
+  yt.forEach(t => { o += `<line class="gl" x1="${ml}" x2="${W - mr}" y1="${ys(t)}" y2="${ys(t)}"/><text class="tx" x="${ml - 8}" y="${ys(t) + 4}" text-anchor="end">${fmt(t, t % 1 ? 1 : 0)}</text>`; });
+  xt.forEach(t => { o += `<text class="tx" x="${xs(t)}" y="${H - mb + 18}" text-anchor="middle">${fmt(t, t % 1 ? 1 : 0)}</text>`; });
+  o += `<text class="tx" x="${ml}" y="14">давление, МПа</text><text class="tx" x="${W - mr}" y="${H - 8}" text-anchor="end">скорость течения, м/с</text>`;
+  if (c.vcrit < vmax) o += `<rect x="${xs(c.vcrit)}" y="${mt}" width="${xs(vmax) - xs(c.vcrit)}" height="${H - mb - mt}" style="fill:var(--bad);opacity:.12"/>`;
+  const defs = c.el.filter(e => e.lim <= ymax).sort((a, b) => a.lim - b.lim);
+  let lastY = -99;
+  defs.forEach((e, i) => {
+    const y = ys(e.lim);
+    o += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" style="stroke:color-mix(in srgb,${e.c} var(--cm),var(--ink));stroke-width:2;stroke-dasharray:7 5"/>`;
+    let ty = i === 0 ? y + 15 : y - 6;
+    if (i > 0 && Math.abs(ty - lastY) < 14) ty = lastY - 14;
+    lastY = ty;
+    o += `<text class="tx-l" x="${W - mr - 4}" y="${ty}" text-anchor="end" style="fill:color-mix(in srgb,${e.c} var(--cm),var(--ink))">${e.name} ${fmt(e.lim, 1)} МПа</text>`;
+  });
+  const vEnd = pAt(vmax) > ymax ? (ymax - s.p) / c.dpv : vmax;
+  o += `<line x1="${xs(0)}" y1="${ys(s.p)}" x2="${xs(vEnd)}" y2="${ys(pAt(vEnd))}" style="stroke:var(--fg);stroke-width:3"/>`;
+  if (c.vcrit > 0 && c.vcrit < vmax) {
+    const x = xs(c.vcrit), right = x > W * 0.7;
+    o += `<line x1="${x}" x2="${x}" y1="${mt}" y2="${H - mb}" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:3 4"/>`;
+    o += `<text class="tx-l" x="${x + (right ? -6 : 6)}" y="${mt + 12}" text-anchor="${right ? 'end' : 'start'}" style="fill:var(--bad)">критическая ${fmt(c.vcrit, 1)} м/с</text>`;
+  }
+  const mv = clamp(s.v, 0, vEnd), mx = xs(mv), my = ys(clamp(pAt(mv), 0, ymax));
+  o += `<circle cx="${mx}" cy="${my}" r="8" style="fill:var(--st);opacity:.28"/><circle cx="${mx}" cy="${my}" r="5" style="fill:var(--paper);stroke:var(--st);stroke-width:3"/>`;
+  $('chart').innerHTML = o;
+}
+function chartPick(e) {
+  if (!chartMap) return;
+  const r = $('chart').getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * chartMap.W;
+  const v = (x - chartMap.ml) / (chartMap.W - chartMap.ml - chartMap.mr) * chartMap.vmax;
+  stopTest();
+  setVal('v', v);
+}
+{
+  const ch = $('chart');
+  let down = false;
+  ch.addEventListener('pointerdown', e => { down = true; ch.setPointerCapture && ch.setPointerCapture(e.pointerId); chartPick(e); });
+  ch.addEventListener('pointermove', e => { if (down) chartPick(e); });
+  ['pointerup', 'pointercancel'].forEach(ev => ch.addEventListener(ev, () => { down = false; }));
+}
+
+/* ---------- сцена (canvas) ---------- */
+/* цвета сцены берутся из темы страницы */
+let TH = {};
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement), g = k => cs.getPropertyValue(k).trim();
+  TH = {bg1: g('--sc1'), bg2: g('--sc2'), bg3: g('--sc3'), grid: g('--scgrid'), sup: g('--sup'), sup2: g('--sup2'), floor: g('--floor'), tag: g('--tag'), ink: g('--ink'), mu: g('--mu'), acc: g('--acc'), bad: g('--bad')};
+}
+readTheme();
+if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener && matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+new MutationObserver(readTheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+
+
+const cv = $('cv'), ctx = cv.getContext('2d');
+const W0 = 960, H0 = 380;
+let VW = 960, VX0 = 0, scale = 1, cssW = 0, cssH = 0, dpr = 1;
+function resize() {
+  const w = $('view').clientWidth;
+  if (!w) return;
+  VW = w < 700 ? 620 : 960; VX0 = (W0 - VW) / 2; scale = w / VW; cssW = w; cssH = Math.round(w * H0 / VW);
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.style.height = cssH + 'px';
+  cv.width = Math.round(w * dpr); cv.height = Math.round(cssH * dpr);
+}
+if (window.ResizeObserver) new ResizeObserver(resize).observe($('view')); else window.addEventListener('resize', resize);
+
+/* Баллон под давлением: корпус A, крышка B на выбранном соединении, манометр сверху, подводящая линия с задвижкой слева. */
+function geom(s, m) {
+  const cy = 222, R = 74, xJ = 560;
+  const t = v => clamp(v * 2 * R / s.D * 2.2, 5, 22);
+  const G = {cy, R, xJ, xc: xJ, j: m.joint, tA: t(s.eA), tB: t(s.eB), x0: 196, lidLen: 64, gx: 400, gy: 84, gr: 54};
+  G.jw = {glue: 26, thread: 30, flange: 16, weld: 8, press: 28}[m.joint];
+  G.jR = {glue: R + 9, thread: R + 7, flange: R + 32, weld: R + 5, press: R + 12}[m.joint];
+  G.xL = xJ - G.jw; G.xR = xJ + G.jw;
+  G.top = cy - G.jR; G.bot = cy + G.jR;
+  G.win = {x0: 266, x1: 470};
+  return G;
+}
+const pullFail = () => C.SF < 1 && C.E[C.mode].pull;
+const flyK = () => Math.min(1, rp * 1.1);
+const shiftOf = () => pullFail() ? 560 * (1 - Math.pow(1 - flyK(), 3)) : 0;
+const END = W0 + 80;
+function regions(G, sh) {
+  const {cy, R, xJ, jw, jR} = G;
+  const jid = {glue: 'glue', thread: 'thr', flange: 'bolt', weld: 'weld', press: 'grip'}[G.j];
+  const out = [];
+  if (G.j === 'thread') out.push({id: 'thr', x: xJ - 30 + sh, y: cy - jR, w: 44, h: 2 * jR}, {id: 'root', x: xJ + 14 + sh, y: cy - R, w: 24, h: 2 * R});
+  else out.push({id: jid, x: xJ - jw, y: cy - jR, w: 2 * jw, h: 2 * jR});
+  out.push({id: 'gauge', x: G.gx - G.gr - 8, y: G.gy - G.gr - 8, w: 2 * G.gr + 16, h: 2 * G.gr + 16});
+  out.push({id: 'oil', x: G.win.x0, y: cy - R + G.tA, w: G.win.x1 - G.win.x0, h: 2 * (R - G.tA)});
+  out.push({id: 'wallA', x: G.x0, y: cy - R, w: xJ - jw - G.x0, h: 2 * R});
+  out.push({id: 'wallB', x: xJ + jw + sh, y: cy - R, w: G.lidLen + R * .8 - jw, h: 2 * R});
+  return out;
+}
+
+const fiber = (() => {
+  const o = document.createElement('canvas'); o.width = o.height = 12;
+  const c = o.getContext('2d'); if (!c) return null;
+  c.strokeStyle = 'rgba(55,80,0,.7)'; c.lineWidth = 1.2;
+  c.beginPath(); c.moveTo(0, 12); c.lineTo(12, 0); c.moveTo(-6, 6); c.lineTo(6, -6); c.moveTo(6, 18); c.lineTo(18, 6); c.stroke();
+  return o;
+})();
+const noise = (() => {
+  const o = document.createElement('canvas'); o.width = 128; o.height = 64;
+  const c = o.getContext('2d'); if (!c) return null;
+  const im = c.createImageData(128, 64);
+  for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 30; }
+  c.putImageData(im, 0, 0);
+  for (let i = 0; i < 26; i++) { const y = Math.random() * 64; c.strokeStyle = `rgba(255,255,255,${.05 + Math.random() * .12})`; c.lineWidth = .5 + Math.random(); c.beginPath(); c.moveTo(Math.random() * 60, y); c.lineTo(50 + Math.random() * 78, y + Math.random() * 1.5 - .75); c.stroke(); }
+  return o;
+})();
+let fiberPat = null, noisePat = null;
+
+function matStyle(id, y0, y1) {
+  const g = ctx.createLinearGradient(0, y0, 0, y1), st = MAT[id].grad;
+  st.forEach((c, i) => g.addColorStop(i / (st.length - 1), c));
+  return g;
+}
+function metal(y0, y1) { return matStyle('steel', y0, y1); }
+function shadeStyle(y0, y1) {
+  const g = ctx.createLinearGradient(0, y0, 0, y1);
+  g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(.12, 'rgba(0,0,0,.08)'); g.addColorStop(.24, 'rgba(255,255,255,.4)');
+  g.addColorStop(.32, 'rgba(255,255,255,.06)'); g.addColorStop(.7, 'rgba(0,0,0,.12)'); g.addColorStop(.9, 'rgba(0,0,0,.42)'); g.addColorStop(1, 'rgba(0,0,0,.75)');
+  return g;
+}
+/* профиль: прямой участок с полусферическими днищами по желанию */
+function capPath(xa, xb, rad, cy, dl, dr) {
+  const rx = rad * .8;
+  ctx.beginPath();
+  ctx.moveTo(dl ? xa + rx : xa, cy - rad);
+  if (dr) { ctx.lineTo(xb - rx, cy - rad); ctx.ellipse(xb - rx, cy, rx, rad, 0, -Math.PI / 2, Math.PI / 2); }
+  else { ctx.lineTo(xb, cy - rad); ctx.lineTo(xb, cy + rad); }
+  if (dl) { ctx.lineTo(xa + rx, cy + rad); ctx.ellipse(xa + rx, cy, rx, rad, 0, Math.PI / 2, Math.PI * 1.5); }
+  else ctx.lineTo(xa, cy + rad);
+  ctx.closePath();
+}
+function shell(id, xa, xb, rad, o = {}) {
+  const cy = o.cy || 0, y0 = cy - rad, y1 = cy + rad;
+  capPath(xa, xb, rad, cy, o.dl, o.dr);
+  ctx.fillStyle = matStyle(id, y0, y1); ctx.fill();
+  ctx.save(); ctx.clip();
+  if (noisePat) { ctx.globalAlpha = .7; ctx.fillStyle = noisePat; ctx.fillRect(xa, y0, xb - xa, 2 * rad); }
+  if (id === 'grp' && fiberPat) { ctx.globalAlpha = .4; ctx.fillStyle = fiberPat; ctx.fillRect(xa, y0, xb - xa, 2 * rad); }
+  ctx.globalAlpha = 1;
+  if (id === 'pe100' || id === 'pe80') { ctx.fillStyle = 'rgba(70,130,255,.9)'; ctx.fillRect(xa, cy - rad * .62, xb - xa, 3); }
+  if (o.u != null) { ctx.fillStyle = col(o.u, .24 * clamp(o.u, 0, 1.2) * (o.pulse || 1)); ctx.fillRect(xa, y0, xb - xa, 2 * rad); }
+  ctx.fillStyle = shadeStyle(y0, y1); ctx.fillRect(xa, y0, xb - xa, 2 * rad);
+  if (o.dl || o.dr) {
+    const hx = o.dl ? xa + rad * .55 : xb - rad * .55, rg = ctx.createRadialGradient(hx, cy - rad * .35, 2, hx, cy - rad * .35, rad);
+    rg.addColorStop(0, 'rgba(255,255,255,.28)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rg; ctx.fillRect(xa, y0, xb - xa, 2 * rad);
+  }
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1.2; capPath(xa, xb, rad, cy, o.dl, o.dr); ctx.stroke();
+}
+function nut(x, y, w, h) {
+  ctx.fillStyle = metal(y - h / 2, y + h / 2); ctx.fillRect(x, y - h / 2, w, h);
+  ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1; ctx.strokeRect(x, y - h / 2, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(x + 1, y - h / 2 + 1, 2, h - 2);
+}
+function boltRows(R) {
+  const n = clamp(Math.ceil(S.nb / 2), 2, 6), out = [];
+  for (let i = 0; i < n; i++) out.push((R + 20) * Math.cos(Math.PI * (i + .5) / n));
+  return out;
+}
+
+/* подводящая линия с задвижкой */
+function drawFeed(G, t) {
+  const {cy} = G, r = 20, xa = -60, xb = G.x0 + 10;
+  shell('steel', xa, xb, r, {cy});
+  ctx.save(); ctx.beginPath(); ctx.rect(xa, cy - r + 5, xb - xa, 2 * r - 10); ctx.clip();
+  ctx.fillStyle = fcm('base', 'hi', .3, .95); ctx.fillRect(xa, cy - r + 5, xb - xa, 2 * r - 10);
+  ctx.strokeStyle = fc('shine', .7); ctx.lineWidth = 2; ctx.lineCap = 'round';
+  const off = (t * S.v * 60) % 26;
+  for (let x = xa - 26 + off; x < xb; x += 26) for (const dy of [-6, 4]) { ctx.beginPath(); ctx.moveTo(x + (dy > 0 ? 9 : 0), cy + dy); ctx.lineTo(x + (dy > 0 ? 9 : 0) + 8, cy + dy); ctx.stroke(); }
+  ctx.lineCap = 'butt'; ctx.restore();
+  const vx = 116;
+  ctx.fillStyle = metal(cy - 30, cy + 30); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(vx - 18, cy - 30, 36, 60, 5) : ctx.rect(vx - 18, cy - 30, 36, 60); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.fillStyle = metal(cy - 74, cy - 30); ctx.fillRect(vx - 3, cy - 72, 6, 42);
+  ctx.save(); ctx.translate(vx, cy - 76);
+  ctx.strokeStyle = TH.acc; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(0, 0, 28, 8, 0, 0, 6.2832); ctx.stroke();
+  ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(26, 0); ctx.moveTo(0, -7); ctx.lineTo(0, 7); ctx.stroke();
+  ctx.restore();
+  ctx.font = '500 12px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = TH.acc;
+  ctx.fillText(`поток ${fmt(S.v, 1)} м/с →`, Math.max(VX0 + 16, 8), cy + r + 22);
+}
+
+/* манометр */
+let needleP = 0;
+function drawGauge(G, t, pulse) {
+  const {gx, gy, gr, cy, R} = G;
+  ctx.fillStyle = metal(gy, cy - R); ctx.fillRect(gx - 6, gy + gr, 12, cy - R - gy - gr + 4);
+  ctx.fillStyle = metal(cy - R - 6, cy - R + 4); ctx.fillRect(gx - 12, cy - R - 6, 24, 9);
+  const gt = niceTicks(Math.max(C.pLim * 1.25, C.pmax * 1.1, 1), 5), gmax = gt[gt.length - 1];
+  const a0 = Math.PI * .75, a1 = Math.PI * 2.25, ang = p => a0 + (a1 - a0) * clamp(p / gmax, 0, 1.04);
+  const bz = ctx.createLinearGradient(gx - gr, gy - gr, gx + gr, gy + gr);
+  bz.addColorStop(0, '#eef2f6'); bz.addColorStop(.45, '#8a95a3'); bz.addColorStop(1, '#2a313b');
+  ctx.fillStyle = bz; ctx.beginPath(); ctx.arc(gx, gy, gr + 7, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.fillStyle = '#f6f8fa'; ctx.beginPath(); ctx.arc(gx, gy, gr, 0, 6.2832); ctx.fill();
+  const zone = (p0, p1, c) => { if (p1 <= p0) return; ctx.strokeStyle = c; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(gx, gy, gr - 8, ang(p0), ang(p1)); ctx.stroke(); };
+  zone(C.pLim / SF_NORM, Math.min(C.pLim, gmax), '#f0a63a');
+  zone(Math.min(C.pLim, gmax), gmax, '#d4253e');
+  ctx.strokeStyle = '#26313f';
+  for (let i = 0; i <= 40; i++) {
+    const a = a0 + (a1 - a0) * i / 40, maj = i % 8 === 0, r0 = gr - (maj ? 16 : 12);
+    ctx.lineWidth = maj ? 2 : 1; ctx.beginPath(); ctx.moveTo(gx + Math.cos(a) * r0, gy + Math.sin(a) * r0); ctx.lineTo(gx + Math.cos(a) * (gr - 4), gy + Math.sin(a) * (gr - 4)); ctx.stroke();
+  }
+  ctx.fillStyle = '#26313f'; ctx.font = '600 9.5px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  gt.forEach(v => { const a = ang(v); ctx.fillText(fmt(v, v % 1 ? 1 : 0), gx + Math.cos(a) * (gr - 25), gy + Math.sin(a) * (gr - 25)); });
+  ctx.font = '600 9px "IBM Plex Mono", ui-monospace, monospace'; ctx.fillStyle = '#5b6878'; ctx.fillText('МПа', gx, gy + gr * .42);
+  ctx.textBaseline = 'alphabetic';
+  const fail = C.SF < 1, target = fail ? (pullFail() ? 0 : C.pmax * (1 - .7 * Math.min(1, rp))) : C.pmax;
+  needleP += (target - needleP) * .18;
+  const jit = (!RM && pulse < 1) ? Math.sin(t * 37) * gmax * .008 : 0, na = ang(needleP + jit);
+  ctx.strokeStyle = '#d4253e'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(gx - Math.cos(na) * 10, gy - Math.sin(na) * 10); ctx.lineTo(gx + Math.cos(na) * (gr - 11), gy + Math.sin(na) * (gr - 11)); ctx.stroke();
+  ctx.lineCap = 'butt';
+  ctx.fillStyle = '#1b222c'; ctx.beginPath(); ctx.arc(gx, gy, 5, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(gx, gy, gr - 3, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
+}
+
+/* крышка в собственных координатах: x = 0 на плоскости разъёма, y = 0 на оси */
+function drawLid(G, pulse) {
+  const {R} = G, E = C.E, mB = M.mB, L = G.lidLen + R * .8;
+  shell(mB, 0, L, R, {dr: true, u: E.wallB.u, pulse});
+  switch (G.j) {
+    case 'glue':
+      shell(mB, -26, 22, R + 9, {u: E.glue.u, pulse});
+      ctx.save(); ctx.shadowColor = col(E.glue.u, 1); ctx.shadowBlur = 12 * dpr;
+      ctx.fillStyle = col(E.glue.u, .95); ctx.fillRect(-28, -R - 9, 4, 2 * R + 18); ctx.restore();
+      break;
+    case 'thread':
+      shell(mB, -30, 14, R + 7, {u: E.thr.u, pulse});
+      ctx.save(); capPath(-30, 14, R + 7, 0); ctx.clip();
+      ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 1.4;
+      for (let x = -40; x < 20; x += 5) { ctx.beginPath(); ctx.moveTo(x, -R - 8); ctx.lineTo(x + 8, R + 8); ctx.stroke(); }
+      ctx.restore();
+      ctx.fillStyle = col(E.root.u, .3 * pulse); ctx.fillRect(14, -R, 24, 2 * R);
+      break;
+    case 'flange':
+      shell(mB, 1.5, 16, R + 32, {});
+      shell(mB, 16, 30, R + 12, {});
+      if (!pullFail()) ctx.fillStyle = '#1a1a1a';
+      boltRows(R).forEach(y => {
+        ctx.fillStyle = metal(y - 3.5, y + 3.5); ctx.fillRect(0, y - 3.5, 22, 7);
+        ctx.fillStyle = col(E.bolt.u, .55 * pulse); ctx.fillRect(0, y - 3.5, 22, 7);
+        nut(22, y, 9, 14);
+      });
+      break;
+    case 'press':
+      shell(mB, -20, 0, R, {});
+      break;
+    default:
+      shell(mB, -2, 2, R, {});
+  }
+}
+
+function drawVessel(G, t, pulse) {
+  const {cy, R, xJ} = G, E = C.E, mA = M.mA, sh = shiftOf(), fail = C.SF < 1;
+  const rA = R * (1 + (RM ? 0 : .025 * clamp(E.wallA.u, 0, 1.2) * (2 - pulse)));
+  shell(mA, G.x0, xJ, rA, {cy, dl: true, u: E.wallA.u, pulse});
+  if (G.j === 'flange') { shell(mA, xJ - 30, xJ - 16, R + 12, {cy}); shell(mA, xJ - 16, xJ - 1.5, R + 32, {cy}); }
+  if (G.j === 'thread' && !pullFail()) { ctx.fillStyle = '#1a1a1a'; }
+  // крышка
+  const k = flyK(), drop = pullFail() ? 170 * k * k : 0, rot = pullFail() ? k * 1.5 : 0;
+  ctx.save(); ctx.translate(xJ + sh, cy + drop); ctx.rotate(rot); drawLid(G, pulse); ctx.restore();
+  if (G.j === 'flange') {
+    ctx.fillStyle = '#1a1a1a'; if (!pullFail()) ctx.fillRect(xJ - 1.5, cy - R - 24, 3, 2 * R + 48);
+    boltRows(R).forEach(yy => {
+      const y = cy + yy;
+      ctx.fillStyle = metal(y - 3.5, y + 3.5); ctx.fillRect(xJ - 22, y - 3.5, 22 - (pullFail() ? 6 : 0), 7);
+      ctx.fillStyle = col(E.bolt.u, .55 * pulse); ctx.fillRect(xJ - 22, y - 3.5, 22 - (pullFail() ? 6 : 0), 7);
+      nut(xJ - 31, y, 9, 14);
+    });
+  }
+  if (G.j === 'weld') {
+    const hz = ctx.createLinearGradient(xJ - 34, 0, xJ + 34, 0);
+    hz.addColorStop(0, 'rgba(90,70,255,0)'); hz.addColorStop(.3, 'rgba(120,90,255,.2)'); hz.addColorStop(.45, 'rgba(255,170,60,.3)');
+    hz.addColorStop(.55, 'rgba(255,170,60,.3)'); hz.addColorStop(.7, 'rgba(120,90,255,.2)'); hz.addColorStop(1, 'rgba(90,70,255,0)');
+    ctx.save(); capPath(xJ - 34, xJ + 34, R, cy); ctx.clip(); ctx.fillStyle = hz; ctx.fillRect(xJ - 34, cy - R, 68, 2 * R); ctx.restore();
+    const plast = MAT[mA].weld && MAT[mA].weld !== 'steel';
+    shell(plast ? mA : 'steel', xJ - 6, xJ + 6, R + 5, {cy, u: E.weld.u, pulse});
+    ctx.save(); capPath(xJ - 6, xJ + 6, R + 5, cy); ctx.clip();
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1;
+    for (let y = cy - R - 5; y < cy + R + 5; y += 4) { ctx.beginPath(); ctx.moveTo(xJ - 7, y); ctx.quadraticCurveTo(xJ, y + 3, xJ + 7, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (G.j === 'press') {
+    shell('steel', xJ - 28, xJ + 28, R + 12, {cy, u: E.grip.u, pulse});
+    for (const sg of [-1, 1]) {
+      const y = cy + sg * (R + 18);
+      ctx.fillStyle = metal(y - 9, y + 9); ctx.fillRect(xJ - 20, y - 9, 40, 18);
+      ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1; ctx.strokeRect(xJ - 20, y - 9, 40, 18);
+      nut(xJ - 30, y, 10, 14); nut(xJ + 20, y, 10, 14);
+    }
+    ctx.fillStyle = col(E.grip.u, .9); ctx.save(); ctx.shadowColor = col(E.grip.u, 1); ctx.shadowBlur = 10 * dpr;
+    ctx.fillRect(xJ + 26, cy - R + 4, 3, 2 * R - 8); ctx.restore();
+  }
+  if (fail && pullFail()) {
+    // открытый торец корпуса
+    const inner = R - G.tA;
+    ctx.fillStyle = matStyle(mA, cy - R, cy + R); ctx.beginPath(); ctx.ellipse(xJ, cy, R * .2, R, 0, 0, 6.2832); ctx.fill();
+    const rg = ctx.createRadialGradient(xJ, cy, 2, xJ, cy, inner);
+    rg.addColorStop(0, fc('base', 1)); rg.addColorStop(1, fcm('base', 'hi', .5, 1));
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.ellipse(xJ, cy, inner * .2, inner, 0, 0, 6.2832); ctx.fill();
+  }
+  drawGauge(G, t, pulse);
+}
+
+function drawWindow(G) {
+  const {cy, R} = G, t = G.tA, x0 = G.win.x0, x1 = G.win.x1;
+  const yi0 = cy - R + t, yi1 = cy + R - t;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0, cy - R - 1, x1 - x0, 2 * R + 2); ctx.clip();
+  const og = ctx.createLinearGradient(0, yi0, 0, yi1);
+  og.addColorStop(0, fcm('base', 'base', 0, 1)); og.addColorStop(.5, fcm('base', 'hi', .55, 1)); og.addColorStop(1, fcm('base', 'base', 0, 1));
+  ctx.fillStyle = og; ctx.fillRect(x0, yi0, x1 - x0, yi1 - yi0);
+  ctx.fillStyle = fc('hi', clamp(.08 + S.v * .025, 0, .35)); ctx.fillRect(x0, cy - (R - t) * .4, x1 - x0, (R - t) * .8);
+  ctx.lineCap = 'round'; ctx.lineWidth = 2;
+  for (const p of parts) {
+    const x = x0 + ((p.x % (x1 - x0)) + (x1 - x0)) % (x1 - x0), y = cy + p.eta * (R - t) * .94, len = 4 + p.sp * .05, a = .3 + .6 * (1 - p.eta * p.eta);
+    ctx.strokeStyle = fc('shine', (a * .8).toFixed(2));
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - len, y); ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
+  [[cy - R, t], [yi1, t]].forEach(([y, h]) => {
+    ctx.fillStyle = matStyle(M.mA, y, y + h); ctx.fillRect(x0, y, x1 - x0, h);
+    ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); for (let x = x0 - h; x < x1; x += 6) { ctx.moveTo(x, y + h); ctx.lineTo(x + h, y); } ctx.stroke();
+  });
+  ctx.restore();
+  ctx.strokeStyle = TH.acc; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+  ctx.strokeRect(x0, cy - R - 1, x1 - x0, 2 * R + 2); ctx.setLineDash([]);
+  return {x0, x1};
+}
+
+function failLoc(G, sh) {
+  const {cy, R, xJ} = G;
+  switch (C.mode) {
+    case 'wallA': return {x: 380, y: cy - R * .3};
+    case 'wallB': return {x: xJ + 58 + sh, y: cy - R * .3};
+    case 'root': return {x: xJ + 26 + sh, y: cy - R * .25};
+    case 'weld': return {x: xJ, y: cy - R * .25};
+    default: return {x: xJ + 6, y: cy, pull: true};
+  }
+}
+function drawRupture(G, sh, t) {
+  const f = failLoc(G, sh), {cy, R, xJ} = G, e = Math.min(1, rp * 1.3);
+  const rnd = i => { const v = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
+  const line = (pts, w, c) => { ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.lineWidth = w; ctx.strokeStyle = c; ctx.stroke(); };
+  const branch = (x, y, ang, len, seed, w = .9) => {
+    const pts = [[x, y]];
+    for (let j = 0; j < 4; j++) { ang += (rnd(seed + j) - .5) * .9; x += Math.cos(ang) * len / 4; y += Math.sin(ang) * len / 4; pts.push([x, y]); }
+    line(pts, w, 'rgba(8,8,10,.85)');
+  };
+  const ring = (x, seed, gap, rim) => {
+    const n = 14, L = [], Rr = [];
+    for (let i = 0; i <= n; i++) { const y = cy - R + 2 * R * i / n, dx = (rnd(seed + i) - .5) * 7; L.push([x + dx - gap / 2, y]); Rr.push([x + dx + gap / 2, y]); }
+    ctx.beginPath(); L.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); for (let i = n; i >= 0; i--) ctx.lineTo(Rr[i][0], Rr[i][1]); ctx.closePath();
+    ctx.fillStyle = '#060403'; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
+    if (rim) line(Rr.map(q => [q[0] + 1, q[1]]), .8, rim);
+    for (let k = 0; k < 5; k++) { const i = 1 + Math.floor(rnd(seed + 30 + k) * (n - 2)); branch(L[i][0], L[i][1], Math.PI + (rnd(k + seed) - .5), 10 + 14 * e, seed + k * 7); branch(Rr[i][0], Rr[i][1], (rnd(k + seed + 3) - .5), 10 + 14 * e, seed + k * 11); }
+  };
+  const stain = (x, y, rx, ry) => {
+    const g = ctx.createRadialGradient(x, y, 2, x, y, rx);
+    g.addColorStop(0, fc('base', (.7 * e).toFixed(2))); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, ry / rx); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx, 0, 6.2832); ctx.fill(); ctx.restore();
+  };
+  const clipBody = () => {
+    ctx.save();
+    if (C.mode === 'wallB') capPath(xJ + G.jw + 2, xJ + G.lidLen + R * .8, R, cy, false, true);
+    else if (C.mode === 'wallA') capPath(G.x0, xJ - G.jw - 2, R, cy, true, false);
+    else { ctx.beginPath(); ctx.rect(G.x0, cy - R, 2000, 2 * R); }
+    ctx.clip();
+  };
+
+  if (f.pull) {
+    // струя из открытого корпуса
+    const len = 60 + 300 * e;
+    const og = ctx.createLinearGradient(xJ, 0, xJ + len, 0);
+    og.addColorStop(0, fc('base', .94)); og.addColorStop(.6, fc('base', .6)); og.addColorStop(1, fc('base', 0));
+    ctx.fillStyle = og; ctx.beginPath(); ctx.moveTo(xJ, cy - R + 10); ctx.quadraticCurveTo(xJ + len * .5, cy - R * 1.2, xJ + len, cy - R * .9 + 30 * e);
+    ctx.lineTo(xJ + len, cy + R * 1.4); ctx.quadraticCurveTo(xJ + len * .5, cy + R * 1.1, xJ, cy + R - 10); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = fc('shine', .3); ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) { const y0 = cy - R * .7 + i * R * .23; ctx.beginPath(); ctx.moveTo(xJ + 4, y0); ctx.quadraticCurveTo(xJ + len * .5, y0 + Math.sin(t * 9 + i) * 6, xJ + len * .9, y0 * 1 + (y0 - cy) * .4 + 20 * e); ctx.stroke(); }
+    if (C.mode === 'glue') {
+      ctx.fillStyle = 'rgba(190,170,120,.9)';
+      for (let i = 0; i < 9; i++) { const y = cy - R + 8 + i * (2 * R - 16) / 8, w = 3 + 6 * rnd(i); ctx.fillRect(xJ - 2, y - 3, w, 6); }
+    } else if (C.mode === 'grip') {
+      ctx.fillStyle = '#121214'; ctx.strokeStyle = '#3a3b40'; ctx.lineWidth = 1;
+      for (const s2 of [-1, 1]) { ctx.beginPath(); ctx.ellipse(xJ + 34 + 40 * e, cy + s2 * (R + 4) + 30 * e, 9, 4, .6 * e, 0, 6.2832); ctx.fill(); ctx.stroke(); }
+    }
+    return;
+  }
+  if (C.mode === 'weld') {
+    for (const [d, c] of [[10, 'rgba(70,90,200,.35)'], [18, 'rgba(190,150,60,.3)']]) { ctx.fillStyle = c; ctx.fillRect(xJ - d, cy - R, 4, 2 * R); ctx.fillRect(xJ + d - 4, cy - R, 4, 2 * R); }
+    stain(xJ, f.y, 40, 70); clipBody(); ring(xJ + 3, 3, 2 + 5 * e, 'rgba(230,232,236,.5)'); ctx.restore();
+    return;
+  }
+  if (C.mode === 'root') {
+    const x = f.x - 6; stain(x, cy, 36, 70); clipBody(); ring(x, 11, 2 + 7 * e, 'rgba(230,232,236,.5)'); ctx.restore();
+    return;
+  }
+  const mid = C.mode === 'wallA' ? M.mA : M.mB, yc = f.y;
+  const kind = mid === 'grp' ? 'grp' : mid === 'pvc' ? 'pvc' : (mid === 'pe100' || mid === 'pe80' || mid === 'pp') ? 'pe' : mid === 'iron' ? 'iron' : 'steel';
+  if (kind === 'pe') {
+    const bw = 30 + 30 * e, bh = 10 + 18 * e, by = cy - R;
+    const bg = ctx.createRadialGradient(f.x, by - bh * .3, 2, f.x, by, bw);
+    bg.addColorStop(0, '#5a6070'); bg.addColorStop(1, '#14171e');
+    ctx.beginPath(); ctx.ellipse(f.x, by + 4, bw, bh + 4, 0, Math.PI, 0); ctx.fillStyle = bg; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 1; ctx.stroke();
+    const sw = 6 + 16 * e;
+    ctx.beginPath(); ctx.moveTo(f.x - sw, by - bh + 4); ctx.quadraticCurveTo(f.x, by - bh - 4 * e, f.x + sw, by - bh + 4); ctx.quadraticCurveTo(f.x, by - bh + 4 + 5 * e, f.x - sw, by - bh + 4);
+    ctx.fillStyle = '#050302'; ctx.fill(); ctx.strokeStyle = 'rgba(230,235,245,.5)'; ctx.stroke();
+    f.y = by - bh;
+    return;
+  }
+  stain(f.x, yc, 70, 40);
+  clipBody();
+  if (kind === 'pvc') {
+    const r0 = 8 + 14 * e, n = 9, hole = [];
+    for (let i = 0; i < n; i++) { const a = i / n * 6.2832, k = r0 * (.6 + .6 * rnd(i)); hole.push([f.x + Math.cos(a) * k, yc + Math.sin(a) * k * .75]); }
+    ctx.beginPath(); hole.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fillStyle = '#060403'; ctx.fill();
+    ctx.strokeStyle = 'rgba(245,247,250,.7)'; ctx.lineWidth = 1; ctx.stroke();
+    for (let k = 0; k < 11; k++) { const a = k / 11 * 6.2832 + rnd(k) * .4; branch(f.x + Math.cos(a) * r0 * .8, yc + Math.sin(a) * r0 * .6, a, (30 + 50 * rnd(k + 2)) * (.5 + .5 * e), k * 5, 1); }
+    ctx.restore(); return;
+  }
+  const hl = (kind === 'iron' ? 40 : 26) + (kind === 'iron' ? 70 : 50) * e, N = 22, pts = [];
+  if (kind === 'grp') {
+    const wg = ctx.createRadialGradient(f.x, yc, 4, f.x, yc, hl * 1.2);
+    wg.addColorStop(0, `rgba(250,252,235,${(.6 * e).toFixed(2)})`); wg.addColorStop(1, 'rgba(250,252,235,0)');
+    ctx.save(); ctx.translate(f.x, yc); ctx.scale(1, .5); ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(0, 0, hl * 1.2, 0, 6.2832); ctx.fill(); ctx.restore();
+  }
+  for (let i = 0; i <= N; i++) {
+    const u = i / N, x = f.x - hl + 2 * hl * u, open = Math.pow(Math.sin(Math.PI * u), 1.4) * (1 + (kind === 'iron' ? 3 : 5) * e);
+    const dy = kind === 'iron' ? (rnd(i) - .5) * 2.5 : (rnd(i) - .5) * 7 + Math.sin(u * 9) * 2;
+    pts.push([x, yc + dy, open * (.6 + .8 * rnd(i + 40))]);
+  }
+  ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1] - q[2]) : ctx.moveTo(q[0], q[1]));
+  for (let i = N; i >= 0; i--) ctx.lineTo(pts[i][0], pts[i][1] + pts[i][2] * .8);
+  ctx.closePath(); ctx.fillStyle = '#060403'; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.lineWidth = 1.4; ctx.stroke();
+  line(pts.map(q => [q[0], q[1] - q[2] - .8]), .9, kind === 'grp' ? 'rgba(255,255,240,.8)' : 'rgba(235,238,242,.55)');
+  if (kind === 'grp') {
+    ctx.strokeStyle = 'rgba(245,248,220,.85)'; ctx.lineWidth = .7;
+    for (let i = 2; i < N - 1; i++) for (const s2 of [-1, 1]) { const q = pts[i], y = q[1] + s2 * q[2]; ctx.beginPath(); ctx.moveTo(q[0], y); ctx.lineTo(q[0] + (rnd(i * s2) - .5) * 6, y - s2 * (2 + 5 * rnd(i + s2))); ctx.stroke(); }
+  } else {
+    const nb = kind === 'iron' ? 3 : 7;
+    for (let k = 0; k < nb; k++) { const i = 2 + Math.floor(rnd(k + 9) * (N - 4)), q = pts[i], up = k % 2 ? -1 : 1; branch(q[0], q[1], up * (.6 + rnd(k + 3) * .8) + (rnd(k) > .5 ? 0 : Math.PI), (8 + 22 * rnd(k + 7)) * (.4 + .6 * e), k * 13); }
+  }
+  for (const d of [-1, 1]) branch(f.x + d * hl, yc, d > 0 ? 0 : Math.PI, 14 + 26 * e, d + 20);
+  ctx.restore();
+}
+
+/* частицы нефти, струи, осколки, дым */
+const parts = [];
+for (let i = 0; i < 90; i++) parts.push({x: Math.random() * W0, eta: Math.random() * 1.9 - .95, k: .85 + Math.random() * .3, sp: 0});
+const leaks = [], shards = [];
+let smoke = [], rp = 0, shock = 0, popT = 0;
+let leakAcc = 0, shake = 0, flash = 0, wasFail = C.SF < 1, hover = null;
+
+function stepWorld(dt) {
+  const slow = RM ? .3 : 1;
+  for (const p of parts) {
+    p.sp = (.1 + .5 * (1 - p.eta * p.eta)) * S.v * 30 * p.k * slow;
+    p.x += p.sp * dt;
+    if (p.x > 1e6) p.x = 0;
+  }
+  const failNow = C.SF < 1;
+  if (failNow && !wasFail) {
+    rp = 0; shake = 1.6; flash = 1; shock = 1; popT = 1;
+    const G = geom(S, M), f = failLoc(G, 0), mid = C.mode === 'wallA' ? M.mA : M.mB;
+    for (let i = 0; i < 70; i++) {
+      const a = Math.random() * 6.2832, sp = 150 + Math.random() * 420;
+      shards.push({x: f.x, y: f.pull ? G.cy + (Math.random() * 2 - 1) * G.R : f.y, vx: Math.cos(a) * sp * .7 + 60, vy: Math.sin(a) * sp - 120, rot: Math.random() * 6, vr: (Math.random() - .5) * 16,
+        w: 3 + Math.random() * 9, h: 2 + Math.random() * 5, life: 1.8 + Math.random(), c: MAT[mid].grad[1]});
+    }
+  }
+  wasFail = failNow;
+  if (!failNow) window.__rupt = {on: false};
+  rp = failNow ? Math.min(1, rp + dt * 1.5) : 0;
+  shake = Math.max(0, shake - dt * 1.4); flash = Math.max(0, flash - dt * 1.1); shock = Math.max(0, shock - dt * 1.2);
+  popT = failNow ? Math.max(0, popT - dt * .55) : 0;
+  for (let i = shards.length - 1; i >= 0; i--) { const q = shards[i]; q.vy += 700 * dt; q.vx *= .995; q.x += q.vx * dt; q.y += q.vy * dt; q.rot += q.vr * dt; q.life -= dt; if (q.y > H0 - 14 && q.vy > 0) { q.vy *= -.3; q.vx *= .6; q.vr *= .5; } if (q.life <= 0) shards.splice(i, 1); }
+  if (failNow) {
+    const G = geom(S, M), sh = shiftOf(), f = failLoc(G, sh), ratio = Math.min(3, C.pmax / C.pLim), pw = Math.sqrt(ratio) * (.4 + .6 * rp);
+    leakAcc += dt * (90 + 50 * ratio);
+    while (leakAcc >= 1 && leaks.length < 520) {
+      leakAcc -= 1;
+      let x = f.x, y = f.y, vx, vy;
+      if (f.pull) { x = G.xJ + 4; y = G.cy + (Math.random() * 2 - 1) * G.R * .8; vx = (220 + Math.random() * 420) * pw; vy = (Math.random() - .65) * 240; }
+      else { const a = -Math.PI / 2 + (Math.random() - .5) * 1.6; const sp = (220 + Math.random() * 300) * pw; vx = Math.cos(a) * sp + 30; vy = Math.sin(a) * sp; }
+      const life = 1 + Math.random() * .7;
+      leaks.push({x, y, vx, vy, life, max: life, r: 1.6 + Math.random() * 2.6});
+    }
+    window.__rupt = {on: true, x: (f.x - VX0) * scale, y: f.y * scale, pw, pull: !!f.pull};
+    if (Math.random() < dt * 24) smoke.push({x: f.x, y: f.pull ? G.cy - G.R : f.y - 8, r: 7, a: .3, vx: 15 + Math.random() * 30, vy: -25 - Math.random() * 30});
+  }
+  for (let i = leaks.length - 1; i >= 0; i--) {
+    const l = leaks[i];
+    l.vy += 700 * dt; l.x += l.vx * dt; l.y += l.vy * dt; l.life -= dt;
+    if (l.y > H0 - 12 && l.vy > 0) { l.vy *= -.15; l.vx *= .4; }
+    if (l.life <= 0) leaks.splice(i, 1);
+  }
+  smoke = smoke.filter(q => { q.x += q.vx * dt; q.y += q.vy * dt; q.r += 26 * dt; q.a -= .2 * dt; return q.a > 0; });
+}
+
+function tag(text, x, y, color, align) {
+  ctx.font = '600 12px "IBM Plex Mono", ui-monospace, monospace';
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '1.5px';
+  const w = ctx.measureText(text).width + 18, h = 24, x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  ctx.fillStyle = TH.tag; ctx.fillRect(x0, y - h / 2, w, h);
+  ctx.fillStyle = color; ctx.fillRect(x0, y - h / 2, 3, h);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.fillText(text, x0 + 10, y + 1);
+  ctx.textBaseline = 'alphabetic';
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+}
+
+function drawStage(t) {
+  if (!cssW) return;
+  if (!fiberPat && fiber) fiberPat = ctx.createPattern(fiber, 'repeat');
+  if (!noisePat && noise) noisePat = ctx.createPattern(noise, 'repeat');
+  const G = geom(S, M), {cy, R} = G, sh = shiftOf();
+  const crit = Math.max(...C.el.map(e => e.u));
+  const pulse = crit > .75 && !RM ? .75 + .25 * Math.sin(t * 7) : 1;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const bg = ctx.createLinearGradient(0, 0, 0, cssH);
+  bg.addColorStop(0, TH.bg1); bg.addColorStop(.75, TH.bg2); bg.addColorStop(1, TH.bg3);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, cssW, cssH);
+  const sx = shake > 0 ? (Math.random() - .5) * shake * 14 : 0, sy = shake > 0 ? (Math.random() - .5) * shake * 10 : 0;
+  ctx.translate(-VX0 * scale + sx, sy); ctx.scale(scale, scale);
+
+  ctx.strokeStyle = TH.grid; ctx.lineWidth = 1; ctx.beginPath();
+  for (let x = 0; x <= W0; x += 32) { ctx.moveTo(x, 0); ctx.lineTo(x, H0); }
+  for (let y = 0; y <= H0; y += 32) { ctx.moveTo(0, y); ctx.lineTo(W0, y); }
+  ctx.stroke();
+  const fy = H0 - 12;
+  const fl = ctx.createRadialGradient(440, fy, 10, 440, fy, 460);
+  fl.addColorStop(0, TH.floor); fl.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save(); ctx.scale(1, .1); ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(440, fy / .1, 460, 0, 6.2832); ctx.fill(); ctx.restore();
+  ctx.strokeStyle = TH.mu; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-100, fy); ctx.lineTo(W0 + 100, fy); ctx.stroke();
+  // ложементы
+  [300, 486].forEach(x => {
+    ctx.fillStyle = TH.sup; ctx.beginPath(); ctx.moveTo(x - 40, cy + R * .55); ctx.quadraticCurveTo(x, cy + R + 14, x + 40, cy + R * .55); ctx.lineTo(x + 26, fy); ctx.lineTo(x - 26, fy); ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.clip(); ctx.fillStyle = TH.acc;
+    for (let k = -2; k < 6; k++) { ctx.beginPath(); ctx.moveTo(x - 40 + k * 18, fy); ctx.lineTo(x - 30 + k * 18, fy); ctx.lineTo(x + 10 + k * 18, cy + R); ctx.lineTo(x + k * 18, cy + R); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = TH.sup2; ctx.fillRect(x - 34, fy - 6, 68, 6);
+  });
+  drawFeed(G, t);
+  drawVessel(G, t, pulse);
+  const win = drawWindow(G);
+  if (C.SF < 1) drawRupture(G, sh, t);
+  if (hover) {
+    const rg = regions(G, sh).find(q => q.id === hover);
+    if (rg) { ctx.strokeStyle = TH.acc; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.strokeRect(rg.x, rg.y, Math.min(rg.w, W0 + 40 - rg.x), rg.h); ctx.setLineDash([]); }
+  }
+
+  for (const q of smoke) { ctx.fillStyle = `rgba(110,104,100,${q.a.toFixed(2)})`; ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 6.2832); ctx.fill(); }
+  for (const l of leaks) {
+    const a = clamp(l.life / l.max, 0, 1);
+    ctx.fillStyle = a > .6 ? fcm('base', 'hi', .3, (a * .95).toFixed(2)) : fc('base', (a * .95).toFixed(2));
+    ctx.beginPath(); ctx.arc(l.x, l.y, l.r * (1.4 - a * .4), 0, 6.2832); ctx.fill();
+  }
+  for (const q of shards) {
+    ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.globalAlpha = clamp(q.life, 0, 1);
+    ctx.fillStyle = q.c; ctx.beginPath(); ctx.moveTo(-q.w / 2, -q.h / 2); ctx.lineTo(q.w / 2, -q.h); ctx.lineTo(q.w / 3, q.h / 2); ctx.lineTo(-q.w / 2, q.h / 3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = .8; ctx.stroke(); ctx.restore();
+  }
+  if (shock > 0 && C.SF < 1) {
+    const f = failLoc(G, sh), rr = (1 - shock) * 320;
+    ctx.strokeStyle = `rgba(255,220,170,${(shock * .75).toFixed(2)})`; ctx.lineWidth = 2 + shock * 8;
+    ctx.beginPath(); ctx.arc(f.x, f.y, rr, 0, 6.2832); ctx.stroke();
+    const fb = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 30 + 90 * (1 - shock));
+    fb.addColorStop(0, `rgba(255,250,230,${(shock * shock).toFixed(2)})`); fb.addColorStop(.4, `rgba(255,170,60,${(shock * .7).toFixed(2)})`); fb.addColorStop(1, 'rgba(255,80,40,0)');
+    ctx.fillStyle = fb; ctx.beginPath(); ctx.arc(f.x, f.y, 30 + 90 * (1 - shock), 0, 6.2832); ctx.fill();
+  }
+
+  const lx = VX0 + 16, rx = VX0 + VW - 16;
+  tag('A · КОРПУС · ' + matName('A').toUpperCase(), lx, 24, matCol('A'), 'left');
+  tag('B · КРЫШКА · ' + matName('B').toUpperCase(), rx, 24, matCol('B'), 'right');
+  tag(JOINTS[M.joint].name.toUpperCase(), G.xJ + 40, Math.max(64, G.top - 20), '#ff8a3d', 'center');
+  if (win) {
+    ctx.font = '500 11px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.fillStyle = TH.acc;
+    ctx.fillText('ВЫРЕЗ', win.x0 + 4, cy - R - 8);
+  }
+  const yd = G.bot + 16;
+  if (!pullFail()) {
+    ctx.strokeStyle = TH.mu; ctx.lineWidth = 1.2; ctx.beginPath();
+    ctx.moveTo(G.xL, yd - 5); ctx.lineTo(G.xL, yd + 5); ctx.moveTo(G.xR, yd - 5); ctx.lineTo(G.xR, yd + 5); ctx.moveTo(G.xL, yd); ctx.lineTo(G.xR, yd); ctx.stroke();
+    ctx.font = '500 12px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'center';
+    const dimT = {glue: `нахлёст L = ${fmt(S.Lo, 0)} мм`, thread: `резьба L = ${fmt(S.Lo, 0)} мм`, press: `посадка L = ${fmt(S.Lo, 0)} мм`,
+      flange: `${S.nb} болтов М${S.db}`, weld: `φ = ${fmt(S.phi, 2)}`}[M.joint];
+    ctx.fillStyle = TH.ink; ctx.fillText(dimT, G.xJ + 60, Math.min(yd + 16, H0 - 18));
+  }
+  ctx.font = '700 15px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'right';
+  ctx.fillStyle = C.SF < 1 ? TH.bad : TH.acc; ctx.fillText(`${fmt(C.pmax, 1)} МПа`, rx, 62);
+
+  if (popT > 0 && C.SF < 1) {
+    const f = failLoc(G, 0), pull = !!f.pull, word = pull ? 'ЧПОК!' : 'ТРЕСК!';
+    const k = 1 - popT, s = k < .12 ? .4 + k / .12 * .8 : 1.2 - (k - .12) * .25, a = Math.min(1, popT * 3);
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(f.x + (pull ? 120 : 0), Math.max(70, f.y - (pull ? R + 10 : 60))); ctx.rotate(-.13); ctx.scale(s, s);
+    ctx.font = '700 52px Unbounded, "Arial Black", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round'; ctx.lineWidth = 10; ctx.strokeStyle = TH.tag; ctx.strokeText(word, 0, 0);
+    ctx.fillStyle = '#ff7a2e'; ctx.fillText(word, 0, 0);
+    ctx.lineWidth = 2; ctx.strokeStyle = '#ffe1c7'; ctx.strokeText(word, 0, 0);
+    ctx.restore(); ctx.textBaseline = 'alphabetic';
+  }
+
+  if (flash > 0) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = `rgba(255,240,220,${(flash * flash * .35).toFixed(2)})`; ctx.fillRect(0, 0, cssW, cssH);
+    const vg = ctx.createRadialGradient(cssW / 2, cssH / 2, cssH * .2, cssW / 2, cssH / 2, cssW * .6);
+    vg.addColorStop(0, 'rgba(255,69,96,0)'); vg.addColorStop(1, `rgba(255,69,96,${(flash * .55).toFixed(2)})`);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, cssW, cssH);
+  }
+}
+
+/* подсказки при наведении */
+const tip = $('tip');
+function tipText(id) {
+  if (id === 'oil') return [fluidNow().name + ' внутри', `в линии течёт ${fmt(S.v, 1)} м/с`, `давление при ударе ${fmt(C.pmax, 1)} МПа`];
+  if (id === 'gauge') return ['Манометр', `при ударе ${fmt(C.pmax, 1)} МПа`, `предел слабого места ${fmt(C.pLim, 1)} МПа`];
+  const e = C.E[id], d = e.allow < 30 ? 1 : 0;
+  return [e.name, `${e.sym} = ${fmt(e.st, d)} из ${fmt(e.allow, d)} МПа`, `загрузка ${fmt(e.u * 100, 0)} %`];
+}
+function hitAt(px, py) {
+  const lx = px / scale + VX0, ly = py / scale, G = geom(S, M);
+  const yy = ly;
+  for (const rg of regions(G, shiftOf())) if ((C.E[rg.id] || rg.id === 'gauge' || rg.id === 'oil') && lx >= rg.x && lx <= rg.x + rg.w && yy >= rg.y && yy <= rg.y + rg.h) return rg.id;
+  return null;
+}
+function showTip(e) {
+  const rect = cv.getBoundingClientRect();
+  const px = e.clientX - rect.left, py = e.clientY - rect.top;
+  hover = hitAt(px, py);
+  if (!hover) { tip.classList.remove('on'); return; }
+  const t = tipText(hover);
+  tip.children[0].textContent = t[0]; tip.children[1].textContent = t[1]; tip.children[2].textContent = t[2];
+  tip.classList.add('on');
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = clamp(px + 14, 4, cssW - tw - 4) + 'px';
+  tip.style.top = clamp(py + 14, 4, cssH - th - 4) + 'px';
+}
+cv.addEventListener('pointermove', showTip);
+cv.addEventListener('pointerdown', showTip);
+cv.addEventListener('pointerleave', () => { hover = null; tip.classList.remove('on'); });
+
+/* ---------- испытание до разрыва ---------- */
+const test = {on: false};
+const runBtn = $('run');
+function setRun() {
+  runBtn.dataset.on = test.on ? 'true' : 'false';
+  runBtn.innerHTML = test.on ? '<svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg>Остановить' : '<svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Испытать до разрыва';
+}
+function startTest() { test.on = true; setRun(); setVal('v', SPEC.v.min, true); }
+function stopTest() { if (test.on) { test.on = false; setRun(); } }
+runBtn.addEventListener('click', () => { if (test.on) stopTest(); else startTest(); });
+function stepTest(dt) {
+  if (!test.on) return;
+  setVal('v', S.v + 3 * dt, true);
+  if (C.SF < 1 || S.v >= SPEC.v.max) { const hit = C.SF < 1; stopTest(); persist(); if (hit) addLog('test'); }
+}
+
+/* ---------- среда ---------- */
+const PRE_F = [
+  {name: 'Лёгкая нефть', sub: '820 кг/м³ · K 1,40', set: {rho: 820, K: 1.4}, c: {base: [40, 26, 15], hi: [120, 84, 48], shine: [205, 170, 125]}},
+  {name: 'Средняя нефть', sub: '850 кг/м³ · K 1,50', set: {rho: 850, K: 1.5}, c: {base: [14, 12, 11], hi: [62, 58, 56], shine: [185, 180, 175]}},
+  {name: 'Тяжёлая нефть', sub: '930 кг/м³ · K 1,75', set: {rho: 930, K: 1.75}, c: {base: [4, 4, 6], hi: [36, 42, 52], shine: [140, 160, 190]}},
+  {name: 'Дизельное топливо', sub: '840 кг/м³ · K 1,45', set: {rho: 840, K: 1.45}, c: {base: [196, 140, 18], hi: [245, 200, 80], shine: [255, 238, 180]}},
+  {name: 'Вода', sub: '1000 кг/м³ · K 2,20', set: {rho: 1000, K: 2.2}, c: {base: [26, 104, 205], hi: [110, 185, 250], shine: [225, 242, 255]}}
+];
+const fluidNow = () => PRE_F.find(f => Math.abs(S.rho - f.set.rho) < 1e-9 && Math.abs(S.K - f.set.K) < 1e-9) || PRE_F.reduce((a, b) => Math.abs(b.set.rho - S.rho) < Math.abs(a.set.rho - S.rho) ? b : a);
+let FC = PRE_F[1].c;
+const fc = (k, a) => `rgba(${FC[k][0]},${FC[k][1]},${FC[k][2]},${a})`;
+const fcm = (k1, k2, t, a) => `rgba(${FC[k1].map((v, i) => Math.round(v + (FC[k2][i] - v) * t)).join(',')},${a})`;
+
+/* ---------- как довести до нормы ---------- */
+const LEVERS = [
+  {k: 'tc', name: 'Закрывать задвижку медленнее', dir: 1},
+  {k: 'v', name: 'Снизить скорость потока', dir: -1},
+  {k: 'p', name: 'Снизить рабочее давление', dir: -1},
+  {k: 'eA', name: 'Толще стенка трубы A', dir: 1},
+  {k: 'eB', name: 'Толще стенка трубы B', dir: 1},
+  {k: 'Lo', name: 'Длиннее нахлёст, резьба или посадка', dir: 1, j: ['glue', 'thread', 'press']},
+  {k: 'tau', name: 'Взять клей прочнее', dir: 1, j: ['glue']},
+  {k: 'nb', name: 'Поставить больше болтов', dir: 1, j: ['flange']},
+  {k: 'db', name: 'Взять болты толще', dir: 1, j: ['flange']},
+  {k: 'sb', name: 'Взять болты прочнее', dir: 1, j: ['flange']},
+  {k: 'phi', name: 'Усилить контроль шва', dir: 1, j: ['weld']},
+  {k: 'pc', name: 'Сильнее обжать уплотнения', dir: 1, j: ['press']},
+  {k: 'mu', name: 'Уплотнения с бóльшим трением', dir: 1, j: ['press']}
+];
+const sfWith = (k, val) => calc(Object.assign({}, S, {[k]: val}), M).SF;
+function advise() {
+  const out = [];
+  for (const L of LEVERS) {
+    if (L.j && !L.j.includes(M.joint)) continue;
+    const sp = SPEC[L.k], cur = S[L.k], end = L.dir > 0 ? sp.max : sp.min;
+    if (Math.abs(end - cur) < 1e-9 || sfWith(L.k, end) < SF_NORM) continue;
+    let a = cur, b = end;
+    for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (sfWith(L.k, m) >= SF_NORM) b = m; else a = m; }
+    let v = L.dir > 0 ? Math.ceil(b / sp.step - 1e-6) * sp.step : Math.floor(b / sp.step + 1e-6) * sp.step;
+    v = +clamp(v, sp.min, sp.max).toFixed(4);
+    if (sfWith(L.k, v) < SF_NORM) continue;
+    out.push({L, v, rel: Math.abs(v - cur) / (sp.max - sp.min)});
+  }
+  return out.sort((x, y) => x.rel - y.rel).slice(0, 4);
+}
+const advHost = $('adv');
+advHost.addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if (!b) return;
+  stopTest(); setMany({[b.dataset.k]: +b.dataset.v});
+});
+function renderAdvice() {
+  if (C.SF >= SF_NORM) {
+    advHost.innerHTML = `<p class="adv-ok">Запас ×${fmt(C.SF, 2)} не ниже нормы ×${fmt(SF_NORM, 2)}. Менять ничего не нужно.</p>`;
+    return;
+  }
+  const list = advise();
+  if (!list.length) { advHost.innerHTML = '<p class="note" style="margin:0">Ни один параметр в отдельности не поднимает запас до нормы. Смените тип соединения или материал труб.</p>'; return; }
+  advHost.innerHTML = list.map(({L, v}) => {
+    const sp = SPEC[L.k], u = sp.unit ? ' ' + sp.unit : '';
+    return `<div class="adv-i"><b>${L.name}</b><span>${fmt(S[L.k], sp.d)} → <em>${fmt(v, sp.d)}${u}</em></span><button class="mini" type="button" data-k="${L.k}" data-v="${v}"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg>Применить</button></div>`;
+  }).join('');
+}
+
+/* ---------- волна во времени ---------- */
+function drawWave() {
+  const W = 560, H = 300, ml = 50, mr = 14, mt = 18, mb = 40;
+  const T = C.T, per = 2 * T, tEnd = Math.max(per * 5, S.tc * 1.6);
+  const rise = Math.min(S.tc, T), damp = per * 4;
+  const pAt = t => {
+    if (t <= 0) return S.p;
+    const ph = (t % per) / per, sq = ph < .5 ? 1 : -1;
+    const r = Math.min(1, t / Math.max(rise, 1e-3));
+    return Math.max(-0.1, S.p + C.dp * sq * r * Math.exp(-t / damp));
+  };
+  const N = 600, pts = [];
+  let pmax = S.p, pmin = 0;
+  for (let i = 0; i <= N; i++) { const t = tEnd * i / N, p = pAt(t); pts.push([t, p]); pmax = Math.max(pmax, p); pmin = Math.min(pmin, p); }
+  const yt = niceTicks(Math.max(pmax * 1.08, C.pLim * 1.12), 5), ymax = yt[yt.length - 1], ymin = Math.min(0, pmin);
+  const xt = niceTicks(tEnd, 5), xmax = xt[xt.length - 1];
+  const xs = t => ml + (W - ml - mr) * t / xmax, ys = p => H - mb - (H - mt - mb) * (p - ymin) / (ymax - ymin);
+  let o = '';
+  yt.forEach(t => { o += `<line class="gl" x1="${ml}" x2="${W - mr}" y1="${ys(t)}" y2="${ys(t)}"/><text class="tx" x="${ml - 8}" y="${ys(t) + 4}" text-anchor="end">${fmt(t, t % 1 ? 1 : 0)}</text>`; });
+  xt.forEach(t => { o += `<text class="tx" x="${xs(t)}" y="${H - mb + 18}" text-anchor="middle">${fmt(t, t < 1 && t > 0 ? 2 : t % 1 ? 1 : 0)}</text>`; });
+  o += `<text class="tx" x="${W - mr}" y="${H - 6}" text-anchor="end">время, с</text>`;
+  const yl = ys(C.pLim);
+  if (C.pLim <= ymax) {
+    o += `<rect x="${ml}" y="${mt}" width="${W - ml - mr}" height="${Math.max(0, yl - mt)}" style="fill:var(--bad);opacity:.08"/>`;
+    o += `<line x1="${ml}" x2="${W - mr}" y1="${yl}" y2="${yl}" style="stroke:var(--bad);stroke-width:2;stroke-dasharray:7 5"/>`;
+    o += `<text class="tx-l" x="${W - mr - 4}" y="${yl - 6}" text-anchor="end" style="fill:var(--bad)">предел ${fmt(C.pLim, 1)} МПа</text>`;
+  }
+  o += `<line x1="${ml}" x2="${W - mr}" y1="${ys(S.p)}" y2="${ys(S.p)}" style="stroke:var(--mu);stroke-width:1.5;stroke-dasharray:2 4"/>`;
+  const d = pts.map(([t, p], i) => (i ? 'L' : 'M') + xs(t).toFixed(1) + ' ' + ys(p).toFixed(1)).join(' ');
+  o += `<path d="${d} L ${xs(tEnd).toFixed(1)} ${ys(ymin)} L ${ml} ${ys(ymin)} Z" style="fill:var(--acc);opacity:.1"/>`;
+  o += `<path d="${d}" style="fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round"/>`;
+  const over = pts.find(q => q[1] >= C.pLim);
+  if (over) o += `<circle cx="${xs(over[0])}" cy="${ys(over[1])}" r="5" style="fill:var(--bad);stroke:var(--paper);stroke-width:2"/>`;
+  $('pt').innerHTML = o;
+  $('pt-ro').innerHTML = `период <b>${fmt(2 * T, 2)} с</b> · пик <b>${fmt(pmax, 1)} МПа</b>${over ? ` · <b style="color:var(--bad)">предел превышен на ${fmt(over[0] * 1000, 0)} мс</b>` : ''}`;
+}
+
+/* ---------- журнал испытаний ---------- */
+const LOGKEY = 'styk-log-v1';
+let LOG = [];
+try { const r = JSON.parse(localStorage.getItem(LOGKEY) || '[]'); if (Array.isArray(r)) LOG = r.filter(x => x && x.S && x.M).slice(0, 15); } catch (e) {}
+const saveLog = () => { try { localStorage.setItem(LOGKEY, JSON.stringify(LOG)); } catch (e) {} };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+function addLog(kind) {
+  const st = stateOf(C.SF);
+  LOG.unshift({t: Date.now(), kind, S: Object.assign({}, S), M: Object.assign({}, M), SF: C.SF, vc: C.vcrit, st: st.key,
+    title: `${JOINTS[M.joint].name} · ${matName('A')} → ${matName('B')} · DN${S.D}`});
+  LOG = LOG.slice(0, 15); saveLog(); renderLog();
+}
+function renderLog() {
+  const body = $('j-rows');
+  if (!LOG.length) { body.innerHTML = '<tr><td class="empty" colspan="6">Пока пусто. Запустите испытание до разрыва или запишите вариант кнопкой выше.</td></tr>'; return; }
+  body.innerHTML = LOG.map((r, i) => {
+    const d = new Date(r.t), tm = d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'}) + ' · ' + d.toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'});
+    const c = r.st === 'ok' ? 'var(--ok)' : r.st === 'warn' ? 'var(--warn)' : 'var(--bad)';
+    return `<tr><td class="n">${tm}</td><td><span class="tg" style="color:${r.kind === 'test' ? 'var(--bad)' : 'var(--mu)'}">${r.kind === 'test' ? 'Разрыв' : 'Вариант'}</span></td><td>${esc(r.title)}</td><td class="n">${fmt(Math.max(0, r.vc), 1)} м/с</td><td class="n" style="color:${c}">×${r.SF > 99 ? '99+' : fmt(r.SF, 2)}</td><td><div class="act"><button class="mini" type="button" data-load="${i}"><svg class="ic" aria-hidden="true"><use href="#i-load"/></svg>Загрузить</button><button class="mini" type="button" data-del="${i}" aria-label="Удалить запись"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div></td></tr>`;
+  }).join('');
+}
+$('j-rows').addEventListener('click', e => {
+  const l = e.target.closest('[data-load]'), d = e.target.closest('[data-del]');
+  if (l) {
+    const r = LOG[+l.dataset.load]; if (!r) return;
+    stopTest();
+    for (const k in r.M) if (k in M) M[k] = r.M[k];
+    const s = {}; for (const k in DEFAULTS) if (typeof r.S[k] === 'number') s[k] = r.S[k];
+    setMany(s); flashMsg('Вариант загружен');
+    $('view').scrollIntoView({behavior: RM ? 'auto' : 'smooth', block: 'center'});
+  } else if (d) { LOG.splice(+d.dataset.del, 1); saveLog(); renderLog(); }
+});
+let msgTm;
+function flashMsg(t) { const m = $('j-msg'); m.textContent = t; clearTimeout(msgTm); msgTm = setTimeout(() => { m.textContent = ''; }, 2600); }
+$('j-add').addEventListener('click', () => { addLog('manual'); flashMsg('Записано'); });
+let clearArm = 0;
+const CLR = '<svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Очистить журнал', CLR2 = '<svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Нажмите ещё раз';
+$('j-clear').addEventListener('click', e => {
+  if (!LOG.length) return;
+  if (Date.now() - clearArm < 3000) { LOG = []; saveLog(); renderLog(); $('j-clear').innerHTML = CLR; flashMsg('Журнал очищен'); clearArm = 0; return; }
+  clearArm = Date.now(); $('j-clear').innerHTML = CLR2;
+  setTimeout(() => { if (clearArm) { clearArm = 0; $('j-clear').innerHTML = CLR; } }, 3000);
+});
+function protocol() {
+  const st = stateOf(C.SF), u = (k) => `${fmt(S[k], SPEC[k].d)} ${SPEC[k].unit}`;
+  const lines = [
+    'ПРОТОКОЛ РАСЧЁТНОГО ИСПЫТАНИЯ СТЫКА',
+    new Date().toLocaleString('ru-RU'),
+    '',
+    `Соединение: ${JOINTS[M.joint].name}`,
+    `Корпус A: ${matName('A')}, стенка ${u('eA')}, прочность ${u('sA')}`,
+    `Крышка B: ${matName('B')}, стенка ${u('eB')}, прочность ${u('sB')}`,
+    `Внутренний диаметр ${u('D')}, длина трубопровода ${u('L')}`,
+    `Среда: плотность ${u('rho')}, модуль сжатия ${u('K')}`,
+    `Режим: скорость ${u('v')}, рабочее давление ${u('p')}, закрытие задвижки ${u('tc')}`,
+    '',
+    `Скорость волны: ${fmt(C.a, 0)} м/с`,
+    `Скачок давления: +${fmt(C.dp, 2)} МПа`,
+    `Давление при ударе: ${fmt(C.pmax, 2)} МПа`,
+    `Критическая скорость: ${fmt(Math.max(0, C.vcrit), 2)} м/с`,
+    `Запас прочности: ×${fmt(C.SF, 2)} (норма ×${fmt(SF_NORM, 2)})`,
+    `Заключение: ${st.title}. Слабое место: ${C.E[C.mode].weak}.`,
+    '',
+    'Загрузка элементов:',
+    ...C.el.map(e => `  ${e.name}: ${fmt(e.u * 100, 0)} % (предел ${fmt(e.lim, 2)} МПа)`)
+  ];
+  return lines.join('\n');
+}
+$('j-copy').addEventListener('click', () => {
+  const txt = protocol(), ta = $('proto');
+  const fallback = () => { ta.value = txt; ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} flashMsg(ok ? 'Протокол скопирован' : 'Не удалось скопировать: браузер запретил доступ к буферу'); };
+  try { navigator.clipboard.writeText(txt).then(() => flashMsg('Протокол скопирован'), fallback); } catch (e) { fallback(); }
+});
+
+function renderExtra() { FC = fluidNow().c; window.__fluid = FC; renderAdvice(); drawWave(); }
+
+/* ---------- запуск ---------- */
+buildDial('v', $('d-v'), 'big');
+buildDial('p', $('d-p'), 'd-p');
+buildDial('tc', $('d-tc'), 'd-tc');
+buildChips($('scen'), SCEN, true);
+buildPick($('pick-j'), JOINTS, 'joint');
+buildPick($('pick-mA'), MAT, 'mA', () => applyMat('A'));
+buildPick($('pick-mB'), MAT, 'mB', () => applyMat('B'));
+buildGradeSel('A'); buildGradeSel('B');
+buildChips($('pre-d'), PRE_D, true);
+buildChips($('pre-g'), PRE_G, false);
+buildChips($('pre-b'), PRE_B, false);
+buildChips($('pre-w'), PRE_W, false);
+buildChips($('pre-f'), PRE_F, false);
+[['pg-g', ['D', 'L', 'eA', 'eB']], ['pg-f', ['rho', 'K']], ['pg-m', ['sA', 'sB', 'EA', 'EB']], ['pg-j', ['Lo', 'tau', 'nb', 'db', 'sb', 'phi', 'pc', 'mu']]].forEach(([hid, keys]) => keys.forEach(k => {
+  const host = document.createElement('div');
+  $(hid).appendChild(host);
+  buildDial(k, host, 'plain');
+}));
+document.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => { const on = x === tb; x.setAttribute('aria-selected', on); $(x.dataset.tab).hidden = !on; });
+}));
+$('reset').addEventListener('click', () => { stopTest(); Object.assign(M, MDEF); setMany(DEFAULTS); });
+resize();
+update();
+renderLog();
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now;
+  stepTest(dt); stepWorld(dt); drawStage(now / 1000);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawStage(performance.now() / 1000));
+})();
+</script>
+<script>
+/* Оформление: подсветка под курсором, появление блоков, док, вкладки, эффекты разрыва. */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const run = $('run'), dRun = $('dock-run');
+dRun.addEventListener('click', () => run.click());
+const syncDock = () => {
+  dRun.innerHTML = run.dataset.on === 'true' ? '<svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg>Стоп' : '<svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Испытать'; dRun.dataset.on = run.dataset.on;
+  $('dock-sf').textContent = $('sf').textContent;
+  $('dock-t').textContent = $('pill-t').textContent + ' · ' + $('m-vc').textContent;
+};
+new MutationObserver(syncDock).observe(run, {childList: true, attributes: true});
+['sf', 'pill-t', 'm-vc'].forEach(id => new MutationObserver(syncDock).observe($(id), {childList: true, characterData: true, subtree: true}));
+syncDock();
+
+['m-pmax', 'm-dp', 'm-a', 'm-vc'].forEach(id => {
+  const el = $(id); let prev = el.textContent, tm;
+  new MutationObserver(() => {
+    if (el.textContent === prev || RM) return; prev = el.textContent;
+    clearTimeout(tm); tm = setTimeout(() => { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }, 120);
+  }).observe(el, {childList: true});
+});
+
+let snd = false, ac = null;
+try { snd = localStorage.getItem('snd') === '1'; } catch (e) {}
+const sb = $('snd');
+const setSnd = () => { sb.innerHTML = `<svg class="ic" aria-hidden="true"><use href="#i-${snd ? 'vol' : 'mute'}"/></svg>`; sb.setAttribute('aria-pressed', snd); sb.title = snd ? 'Звук включён' : 'Звук выключен'; };
+sb.addEventListener('click', () => { snd = !snd; setSnd(); try { localStorage.setItem('snd', snd ? '1' : '0'); } catch (e) {} if (snd) beep(); });
+setSnd();
+function ctx() { if (!ac) { const A = window.AudioContext || window.webkitAudioContext; if (A) ac = new A(); } if (ac && ac.state === 'suspended') ac.resume(); return ac; }
+function beep() {
+  const a = ctx(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.frequency.value = 880; g.gain.setValueAtTime(.08, a.currentTime); g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + .15);
+  o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + .16);
+}
+function boom() {
+  const a = ctx(); if (!a) return;
+  const n = a.sampleRate * 1.4, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.5);
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = buf; f.type = 'lowpass'; f.frequency.setValueAtTime(1800, a.currentTime); f.frequency.exponentialRampToValueAtTime(120, a.currentTime + 1.2);
+  g.gain.value = .9; s.connect(f).connect(g).connect(a.destination); s.start();
+  const o = a.createOscillator(), og = a.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(90, a.currentTime); o.frequency.exponentialRampToValueAtTime(30, a.currentTime + .6);
+  og.gain.setValueAtTime(.7, a.currentTime); og.gain.exponentialRampToValueAtTime(.001, a.currentTime + .7);
+  o.connect(og).connect(a.destination); o.start(); o.stop(a.currentTime + .7);
+}
+
+const fl = $('flashfx'), kt = $('k-title'), toast = $('toast');
+let tTm;
+function showToast() {
+  $('t-txt').innerHTML = `Скорость потока <b>${$('out-v').textContent.replace('м/с', ' м/с')}</b>, давление при ударе <b>${$('m-pmax').textContent}</b>, критическая скорость <b>${$('m-vc').textContent}</b>. ${$('k-weak').innerHTML}`;
+  toast.classList.add('on'); clearTimeout(tTm); tTm = setTimeout(() => toast.classList.remove('on'), 7000);
+}
+$('t-close').addEventListener('click', () => toast.classList.remove('on'));
+$('t-again').addEventListener('click', () => { toast.classList.remove('on'); if (run.dataset.on !== 'true') run.click(); });
+let st = root.dataset.state;
+new MutationObserver(() => {
+  const ns = root.dataset.state; if (ns === st) return;
+  const was = st; st = ns;
+  if (!RM) { kt.classList.remove('flip'); void kt.offsetWidth; kt.classList.add('flip'); }
+  if (ns === 'rupt' && was !== 'rupt') {
+    {
+      fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+      document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 600);
+    }
+    if (navigator.vibrate) try { navigator.vibrate([60, 40, 160]); } catch (e) {}
+    if (snd) boom();
+    showToast();
+  }
+}).observe(root, {attributes: true, attributeFilter: ['data-state']});
+})();
+</script>
+<canvas id="oilfx" aria-hidden="true" style="position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45"></canvas>
+<script>
+/* Взрыв и фонтан нефти поверх страницы. */
+(() => {
+'use strict';
+const oc = document.getElementById('oilfx'), x = oc.getContext('2d'), cv = document.getElementById('cv');
+let W = 0, H = 0, D = 1;
+const fit = () => { D = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; oc.width = W * D; oc.height = H * D; };
+fit(); addEventListener('resize', fit);
+const MOB = innerWidth < 760, CAP = MOB ? 420 : 900;
+const oil = [], fire = [], embers = [], debris = [], splats = [], rings = [];
+let puddle = 0, was = false, age = 0, flashA = 0, last = performance.now(), idle = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const FL = (k, a) => { const c = (window.__fluid || {base: [14, 12, 11], hi: [62, 58, 56], shine: [185, 180, 175]})[k]; return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+
+function burst(px, py) {
+  age = 0; flashA = .45; puddle = Math.max(puddle, 0);
+  rings.push({x: px, y: py, r: 0, a: 1, w: 18}, {x: px, y: py, r: 0, a: .8, w: 6, d: .12});
+  for (let i = 0; i < (MOB ? 14 : 24); i++) { const a = rnd(0, 6.283), sp = rnd(40, 200); fire.push({x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .8 - 80, r: rnd(14, 46), life: rnd(.5, 1.3), max: 1.3}); }
+  for (let i = 0; i < (MOB ? 20 : 40); i++) { const a = rnd(0, 6.283), sp = rnd(200, 700); embers.push({x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 300, life: rnd(.8, 2.4)}); }
+  for (let i = 0; i < (MOB ? 6 : 10); i++) { const a = rnd(-3.1, 0), sp = rnd(300, 900); debris.push({x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, rot: rnd(0, 6), vr: rnd(-14, 14), s: rnd(5, 16), life: 4}); }
+  for (let i = 0; i < (MOB ? 70 : 160); i++) spawnOil(px, py, 1.6, true);
+  const n = MOB ? 7 : 12;
+  if (false) for (let i = 0; i < n; i++) splats.push({x: rnd(.05, .95) * W, y: rnd(.05, .7) * H, r: rnd(18, MOB ? 50 : 80), d: 0, v: rnd(8, 30), a: 0, t: rnd(0, .5), seed: Math.random() * 100});
+}
+function spawnOil(px, py, pw, wide) {
+  if (oil.length > CAP) return;
+  const spread = wide ? 2.6 : .5, a = -Math.PI / 2 + rnd(-spread, spread) / 2;
+  const sp = rnd(.75, 1.15) * Math.min(H * (MOB ? .9 : 1.25), 1500) * Math.min(1.4, .55 + pw * .5);
+  oil.push({x: px + rnd(-6, 6), y: py, vx: Math.cos(a) * sp + rnd(-40, 40), vy: Math.sin(a) * sp, r: rnd(1.2, MOB ? 3 : 4), life: rnd(2.2, 3.4), st: 0});
+}
+function blob(cx, cy, r, seed) {
+  x.beginPath();
+  for (let i = 0; i <= 14; i++) { const a = i / 14 * 6.283, k = r * (1 + .22 * Math.sin(a * 3 + seed) + .12 * Math.sin(a * 5 + seed * 2)); i ? x.lineTo(cx + Math.cos(a) * k, cy + Math.sin(a) * k) : x.moveTo(cx + Math.cos(a) * k, cy + Math.sin(a) * k); }
+  x.closePath();
+}
+function frame(now) {
+  const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now;
+  const R = window.__rupt || {on: false}, cr = cv.getBoundingClientRect();
+  const px = cr.left + (R.x || 0), py = cr.top + (R.y || 0), floor = cr.bottom - 10;
+  if (R.on && !was) burst(px, py);
+  was = R.on;
+  const busy = R.on || oil.length || fire.length || embers.length || debris.length || splats.length || puddle > 0.5 || flashA > 0;
+  if (!busy) { if (!idle) { x.setTransform(D, 0, 0, D, 0, 0); x.clearRect(0, 0, W, H); idle = 1; } requestAnimationFrame(frame); return; }
+  idle = 0; age += dt;
+  if (R.on) {
+    const rate = (MOB ? 160 : 420) * Math.min(1.5, .6 + (R.pw || 1) * .5) * (age < 2 ? 1.6 : 1);
+    for (let i = 0; i < rate * dt; i++) spawnOil(px, py, R.pw || 1, false);
+    if (false) fire.push({x: px + rnd(-10, 10), y: py, vx: rnd(-40, 40), vy: rnd(-260, -120), r: rnd(10, 26), life: rnd(.4, .8), max: .8});
+    puddle = Math.min(MOB ? 160 : 320, puddle + dt * 40);
+  } else puddle = Math.max(0, puddle - dt * 140);
+
+  x.setTransform(D, 0, 0, D, 0, 0); x.clearRect(0, 0, W, H);
+
+  // лужа
+  if (puddle > .5 && cr.bottom > 0 && cr.top < H) {
+    const pw2 = puddle * 2.4, g = x.createRadialGradient(px, floor, 0, px, floor, pw2);
+    g.addColorStop(0, FL('base', .95)); g.addColorStop(.7, FL('base', .85)); g.addColorStop(1, FL('base', 0));
+    x.save(); x.translate(px, floor); x.scale(1, .16); x.fillStyle = g; x.beginPath(); x.arc(0, 0, pw2, 0, 6.283); x.fill();
+    x.fillStyle = FL('shine', .2); x.beginPath(); x.ellipse(-pw2 * .2, -pw2 * .25, pw2 * .45, pw2 * .12, 0, 0, 6.283); x.fill(); x.restore();
+  }
+  // нефть
+  for (let i = oil.length - 1; i >= 0; i--) {
+    const o = oil[i];
+    o.vy += 1500 * dt; o.vx *= .995; o.x += o.vx * dt; o.y += o.vy * dt; o.life -= dt;
+    if (o.y > floor && o.vy > 0 && !o.st) { o.st = 1; o.vy *= -.12; o.vx *= .3; o.r *= 1.4; o.life = Math.min(o.life, .5); puddle = Math.min(MOB ? 160 : 320, puddle + .25); }
+    if (o.life <= 0 || o.y > H + 40) { oil.splice(i, 1); continue; }
+    const sp = Math.hypot(o.vx, o.vy), st = Math.min(3, 1 + sp / 500), ang = Math.atan2(o.vy, o.vx);
+    x.save(); x.translate(o.x, o.y); x.rotate(ang);
+    x.fillStyle = FL('base', 1); x.beginPath(); x.ellipse(0, 0, o.r * st, o.r, 0, 0, 6.283); x.fill();
+    x.fillStyle = FL('shine', .3); x.beginPath(); x.ellipse(o.r * .2, -o.r * .4, o.r * st * .45, o.r * .22, 0, 0, 6.283); x.fill();
+    x.restore();
+  }
+  // осколки
+  for (let i = debris.length - 1; i >= 0; i--) {
+    const d = debris[i]; d.vy += 1400 * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.rot += d.vr * dt; d.life -= dt;
+    if (d.life <= 0 || d.y > H + 50) { debris.splice(i, 1); continue; }
+    x.save(); x.translate(d.x, d.y); x.rotate(d.rot); x.fillStyle = '#9aa0aa'; x.strokeStyle = '#222'; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(-d.s, -d.s * .4); x.lineTo(d.s * .8, -d.s * .6); x.lineTo(d.s * .5, d.s * .5); x.lineTo(-d.s * .6, d.s * .3); x.closePath(); x.fill(); x.stroke(); x.restore();
+  }
+  // огонь и искры
+  x.globalCompositeOperation = 'lighter';
+  for (let i = fire.length - 1; i >= 0; i--) {
+    const f = fire[i]; f.vx *= .92; f.vy = f.vy * .94 - 120 * dt; f.x += f.vx * dt; f.y += f.vy * dt; f.life -= dt; f.r *= 1 + dt * .9;
+    if (f.life <= 0) { fire.splice(i, 1); continue; }
+    const k = f.life / f.max, g = x.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+    g.addColorStop(0, `rgba(255,240,200,${(k * .9).toFixed(2)})`); g.addColorStop(.35, `rgba(255,140,30,${(k * .7).toFixed(2)})`); g.addColorStop(1, 'rgba(160,20,0,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fill();
+  }
+  for (let i = embers.length - 1; i >= 0; i--) {
+    const e = embers[i]; e.vy += 600 * dt; e.vx *= .98; const ox = e.x, oy = e.y; e.x += e.vx * dt; e.y += e.vy * dt; e.life -= dt;
+    if (e.life <= 0) { embers.splice(i, 1); continue; }
+    x.strokeStyle = `rgba(255,${(150 + 100 * Math.min(1, e.life)) | 0},60,${Math.min(1, e.life).toFixed(2)})`; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(ox, oy); x.lineTo(e.x, e.y); x.stroke();
+  }
+  for (let i = rings.length - 1; i >= 0; i--) {
+    const r = rings[i]; if (r.d > 0) { r.d -= dt; continue; } r.r += dt * Math.max(W, H) * 1.1; r.a -= dt * 1.4;
+    if (r.a <= 0) { rings.splice(i, 1); continue; }
+    x.strokeStyle = `rgba(255,220,170,${r.a.toFixed(2)})`; x.lineWidth = r.w * r.a; x.beginPath(); x.arc(r.x, r.y, r.r, 0, 6.283); x.stroke();
+  }
+  if (flashA > 0) {
+    const g = x.createRadialGradient(px, py, 0, px, py, Math.max(W, H) * .8);
+    g.addColorStop(0, `rgba(255,250,235,${flashA.toFixed(2)})`); g.addColorStop(.25, `rgba(255,160,60,${(flashA * .6).toFixed(2)})`); g.addColorStop(1, 'rgba(255,40,40,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, H); flashA = Math.max(0, flashA - dt * 1.6);
+  }
+  x.globalCompositeOperation = 'source-over';
+  // брызги на экране
+  for (let i = splats.length - 1; i >= 0; i--) {
+    const s = splats[i]; s.t -= dt; if (s.t > 0) continue;
+    s.a = Math.min(1, s.a + dt * 8); s.d += s.v * dt; s.v *= .995; s.v += dt * 60;
+    s.age = (s.age || 0) + dt;
+    const fade = Math.max(0, 1 - Math.max(0, s.age - .7) / .6);
+    if (fade <= 0) { splats.splice(i, 1); continue; }
+    x.globalAlpha = s.a * fade * .92; x.fillStyle = '#120803';
+    blob(s.x, s.y, s.r * Math.min(1, s.a * 1.5), s.seed); x.fill();
+    x.beginPath(); x.moveTo(s.x - s.r * .25, s.y); x.lineTo(s.x + s.r * .25, s.y); x.lineTo(s.x + s.r * .12, s.y + s.d); x.arc(s.x, s.y + s.d, s.r * .14, 0, 3.1416); x.closePath(); x.fill();
+    x.fillStyle = 'rgba(255,200,140,.35)'; x.beginPath(); x.ellipse(s.x - s.r * .3, s.y - s.r * .35, s.r * .28, s.r * .12, -.5, 0, 6.283); x.fill();
+    x.globalAlpha = 1;
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
